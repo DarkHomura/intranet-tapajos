@@ -1,5 +1,6 @@
+//ALTERAÇÃO
 export type Vacancy = {
-    departamento_vaga: string;
+    department: string;
     diferencial: string;
     imagem_capa: string;
     isInternalSelection: boolean;
@@ -14,11 +15,14 @@ export type Vacancy = {
     limit_candidatos: number;
     data_inicial: string;
     data_criacao: string;
+    location:string
+    salary:string
 };
 
+//ALTERAÇÃO
 export interface CreateVacancyPayload {
     nome_vaga: string;
-    departamento_vaga: string;
+    department: string;
     requisitos: string;
     diferencial: string;
     limit_candidatos: number;
@@ -28,4 +32,6 @@ export interface CreateVacancyPayload {
     imagem_capa?: File | null;
     url_link?: string | null;
     criado_por?: string | null;
+    location:string
+    salary:string
 }

@@ -13,20 +13,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { AuthGuard } from '@/components/ProtectedRoute/AuthGuard';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import {
-    Table,
-    Button,
-    Tag,
-    Avatar,
-    Spin,
-    Empty,
-    Modal,
-    Descriptions,
-    Image,
-    Tooltip,
-    Tabs,
-    Card,
-} from 'antd';
+import { Table, Button, Tag, Avatar, Spin, Empty, Modal, Descriptions, Image, Tooltip, Tabs, Card } from 'antd';
 import {
     ArrowLeftOutlined,
     UserOutlined,
@@ -56,7 +43,7 @@ export interface PageProps {
 
 export default function VacancyCandidatesPage() {
     const { id } = useParams();
-    
+
     const dispatch = useDispatch<AppDispatch>();
     const { currentVacancy, candidates, candidatesLoading, loading, vacancyName } =
         useSelector((state: RootState) => state.vacancy);
@@ -70,7 +57,6 @@ export default function VacancyCandidatesPage() {
         useState<ICandidate | null>(null);
 
     useEffect(() => {
-        console.log(vacancyName);
         if (id) {
             dispatch(fetchVacancyById(id as string));
             dispatch(fetchVacancyCandidates(id as string));
@@ -105,7 +91,8 @@ export default function VacancyCandidatesPage() {
         const imageName = file_perfil.split('/').pop();
         if (!imageName) return null;
 
-        return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
+        // return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
+        return `http://localhost:8000/candidato/perfil/${imageName}`;
     };
 
     const getCvUrl = (file_cv: string) => {
@@ -114,7 +101,8 @@ export default function VacancyCandidatesPage() {
         const fileName = file_cv.split('/').pop();
         if (!fileName) return null;
 
-        return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        //return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
     };
 
     const getCvViewUrl = (file_cv: string) => {
@@ -123,7 +111,8 @@ export default function VacancyCandidatesPage() {
         const fileName = file_cv.split('/').pop();
         if (!fileName) return null;
 
-        return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        //return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
     };
 
     const downloadCv = (candidate: ICandidate) => {
@@ -176,7 +165,7 @@ export default function VacancyCandidatesPage() {
             dataIndex: ['candidate', 'nome_completo'],
             key: 'nome_completo',
             sorter: (a: ICandidate, b: ICandidate) =>
-                a.nome_completo.localeCompare(b.nome_completo),
+                (a.candidate?.nome_completo ?? " ").localeCompare(b.candidate?.nome_completo ?? ''),
         },
         {
             title: 'Email',
@@ -188,7 +177,7 @@ export default function VacancyCandidatesPage() {
             dataIndex: ['analise', 'score'],
             key: 'score',
             sorter: (a: ICandidate, b: ICandidate) => b.analise.score - a.analise.score,
-           
+
             render: (score: number) => {
                 if (score >= 5 && score < 7) return <Tag color="yellow">{score}</Tag>;
                 if (score >= 7 && score < 9) return <Tag color="green">{score}</Tag>;
@@ -203,6 +192,12 @@ export default function VacancyCandidatesPage() {
             key: 'telefone',
         },
         {
+            title: 'Bairro',
+            dataIndex: ['candidate', 'bairro'],
+            key: 'bairro',
+            sorter: (a: ICandidate, b: ICandidate) => (a.candidate?.bairro ?? '').localeCompare(b.candidate?.bairro ?? ' '),
+        },
+        {
             title: 'Primeira Experiência',
             dataIndex: ['candidate', 'is_primeiraexperiencia'],
             key: 'is_primeiraexperiencia',
@@ -215,8 +210,10 @@ export default function VacancyCandidatesPage() {
                 { text: 'Sim', value: true },
                 { text: 'Não', value: false },
             ],
-            onFilter: (value: boolean, record: ICandidate) =>
-                record.is_primeiraexperiencia === value,
+            onFilter: (value: boolean, record: ICandidate) =>{
+                //console.log(record)
+                return record.candidate?.is_primeiraexperiencia === value
+            }
         },
         {
             title: 'Disponível',
@@ -239,7 +236,7 @@ export default function VacancyCandidatesPage() {
                 { text: 'Não', value: false },
             ],
             onFilter: (value: boolean, record: ICandidate) =>
-                record.is_analizado === value,
+                record.candidate?.is_analizado === value,
         },
         {
             title: 'Currículo',
@@ -293,7 +290,7 @@ export default function VacancyCandidatesPage() {
             ),
         },
     ];
-    
+
     const getScoreColor = (score: number) => {
         if (score >= 5 && score < 7) return 'yellow';
         if (score >= 7 && score < 9) return 'green';
@@ -310,9 +307,8 @@ export default function VacancyCandidatesPage() {
                 <Sidebar isOpen={isSidebarOpen} />
 
                 <main
-                    className={`pt-16 transition-all duration-300 ${
-                        isSidebarOpen ? 'ml-64' : 'ml-16'
-                    }`}
+                    className={`pt-16 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-16'
+                        }`}
                 >
                     <div className="p-6">
                         <div className="mb-6">
@@ -333,12 +329,12 @@ export default function VacancyCandidatesPage() {
                             <>
                                 <div className="mb-6">
                                     <h1 className="text-2xl font-bold text-primary">
-                                        Candidatos para: {vacancyName}
-                                       
+                                        Candidatos para: {currentVacancy?.isInternalSelection? currentVacancy?.nome_vaga + " - Vaga Interna": currentVacancy?.nome_vaga + " - Vaga Externa"}
+
                                     </h1>
                                     <p className="text-gray-600">
                                         Departamento:{' '}
-                                        {currentVacancy?.departamento_vaga} |
+                                        {currentVacancy?.department} |
                                         Tipo:{' '}
                                         {currentVacancy?.isInternalSelection
                                             ? 'Seleção Interna'
@@ -356,11 +352,11 @@ export default function VacancyCandidatesPage() {
                                                 <Spin size="large" />
                                             </div>
                                         ) : candidates &&
-                                          candidates.length > 0 ? (
+                                            candidates.length > 0 ? (
                                             <Table
                                                 columns={columns as any}
                                                 dataSource={candidates}
-                                                rowKey={(record) => 
+                                                rowKey={(record) =>
                                                     record.candidate.id
                                                 }
                                                 sortDirections={['descend', 'ascend']}
@@ -388,11 +384,11 @@ export default function VacancyCandidatesPage() {
                                                 <Spin size="large" />
                                             </div>
                                         ) : candidates &&
-                                          candidates.filter(
-                                              (c: any) =>
-                                                  c.analise?.status ===
-                                                  'aprovado'
-                                          ).length > 0 ? (
+                                            candidates.filter(
+                                                (c: any) =>
+                                                    c.analise?.status ===
+                                                    'aprovado'
+                                            ).length > 0 ? (
                                             <Table
                                                 columns={columns as any}
                                                 dataSource={candidates.filter(
@@ -427,11 +423,11 @@ export default function VacancyCandidatesPage() {
                                                 <Spin size="large" />
                                             </div>
                                         ) : candidates &&
-                                          candidates.filter(
-                                              (c: any) =>
-                                                  c.analise?.status ===
-                                                  'entrevista'
-                                          ).length > 0 ? (
+                                            candidates.filter(
+                                                (c: any) =>
+                                                    c.analise?.status ===
+                                                    'entrevista'
+                                            ).length > 0 ? (
                                             <Table
                                                 columns={columns as any}
                                                 dataSource={candidates.filter(
@@ -466,11 +462,11 @@ export default function VacancyCandidatesPage() {
                                                 <Spin size="large" />
                                             </div>
                                         ) : candidates &&
-                                          candidates.filter(
-                                              (c: any) =>
-                                                  c.analise?.status ===
-                                                  'recusado'
-                                          ).length > 0 ? (
+                                            candidates.filter(
+                                                (c: any) =>
+                                                    c.analise?.status ===
+                                                    'recusado'
+                                            ).length > 0 ? (
                                             <Table
                                                 columns={columns as any}
                                                 dataSource={candidates.filter(
@@ -559,7 +555,7 @@ export default function VacancyCandidatesPage() {
                                                             selectedCandidate
                                                                 .candidate
                                                                 ?.file_perfil ||
-                                                                ''
+                                                            ''
                                                         );
                                                     if (imageUrl)
                                                         showImagePreview(
@@ -634,44 +630,58 @@ export default function VacancyCandidatesPage() {
                                                     : 'Não'}
                                             </Tag>
                                         </Descriptions.Item>
+
+                                        {currentVacancy?.isInternalSelection && (
+                                            <>
+                                                <Descriptions.Item label="Cargo atual">
+                                                    {selectedCandidate.candidate?.cargo_atual}
+                                                </Descriptions.Item>
+
+                                                <Descriptions.Item label="Loja/Setor">
+                                                    {selectedCandidate.candidate?.loja_setor}
+                                                </Descriptions.Item>
+                                            </>
+                                        )}
+
                                         {selectedCandidate.analise?.status && (
                                             <Descriptions.Item label="Status">
                                                 <Tag
                                                     color={
                                                         selectedCandidate
                                                             .analise.status ===
-                                                        'aprovado'
+                                                            'aprovado'
                                                             ? 'green'
                                                             : selectedCandidate
+                                                                .analise
+                                                                .status ===
+                                                                'recusado'
+                                                                ? 'red'
+                                                                : selectedCandidate
                                                                     .analise
                                                                     .status ===
-                                                                'recusado'
-                                                              ? 'red'
-                                                              : selectedCandidate
-                                                                      .analise
-                                                                      .status ===
-                                                                  'entrevista'
-                                                                ? 'blue'
-                                                                : 'default'
+                                                                    'entrevista'
+                                                                    ? 'blue'
+                                                                    : 'default'
                                                     }
                                                 >
                                                     {selectedCandidate.analise
                                                         .status === 'aprovado'
                                                         ? 'Aprovado'
                                                         : selectedCandidate
+                                                            .analise
+                                                            .status ===
+                                                            'recusado'
+                                                            ? 'Recusado'
+                                                            : selectedCandidate
                                                                 .analise
                                                                 .status ===
-                                                            'recusado'
-                                                          ? 'Recusado'
-                                                          : selectedCandidate
-                                                                  .analise
-                                                                  .status ===
-                                                              'entrevista'
-                                                            ? 'Entrevista'
-                                                            : 'Sem status'}
+                                                                'entrevista'
+                                                                ? 'Entrevista'
+                                                                : 'Sem status'}
                                                 </Tag>
                                             </Descriptions.Item>
                                         )}
+
                                     </Descriptions>
                                 </TabPane>
 
@@ -686,148 +696,148 @@ export default function VacancyCandidatesPage() {
                                             {/* Score */}
                                             {selectedCandidate.analise
                                                 .score && (
-                                                <div className="mb-4">
-                                                    <p className="text-2xl text-primary">
-                                                        Score:
-                                                    </p>
-                                                    <p
-                                                        className={`text-2xl ${getScoreColor(selectedCandidate.analise.score)} font-bold`}
-                                                    >
-                                                        {
-                                                            selectedCandidate
-                                                                .analise.score
-                                                        }
-                                                    </p>
-                                                </div>
-                                            )}
+                                                    <div className="mb-4">
+                                                        <p className="text-2xl text-primary">
+                                                            Score:
+                                                        </p>
+                                                        <p
+                                                            className={`text-2xl ${getScoreColor(selectedCandidate.analise.score)} font-bold`}
+                                                        >
+                                                            {
+                                                                selectedCandidate
+                                                                    .analise.score
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                )}
 
                                             {/* Status */}
                                             {selectedCandidate.analise
                                                 .status && (
-                                                <div className="mb-4">
-                                                    <p className="text-xl text-primary mt-4">
-                                                        Status:
-                                                    </p>
-                                                    <Tag
-                                                        className="mt-2 text-lg px-3 py-1"
-                                                        color={
-                                                            selectedCandidate
-                                                                .analise
-                                                                .status ===
-                                                            'aprovado'
-                                                                ? 'green'
-                                                                : selectedCandidate
-                                                                        .analise
-                                                                        .status ===
-                                                                    'recusado'
-                                                                  ? 'red'
-                                                                  : selectedCandidate
-                                                                          .analise
-                                                                          .status ===
-                                                                      'entrevista'
-                                                                    ? 'blue'
-                                                                    : 'default'
-                                                        }
-                                                    >
-                                                        {selectedCandidate
-                                                            .analise.status ===
-                                                        'aprovado'
-                                                            ? 'Aprovado'
-                                                            : selectedCandidate
+                                                    <div className="mb-4">
+                                                        <p className="text-xl text-primary mt-4">
+                                                            Status:
+                                                        </p>
+                                                        <Tag
+                                                            className="mt-2 text-lg px-3 py-1"
+                                                            color={
+                                                                selectedCandidate
                                                                     .analise
                                                                     .status ===
-                                                                'recusado'
-                                                              ? 'Recusado'
-                                                              : selectedCandidate
-                                                                      .analise
-                                                                      .status ===
-                                                                  'entrevista'
-                                                                ? 'Entrevista'
-                                                                : 'Sem status'}
-                                                    </Tag>
-                                                </div>
-                                            )}
+                                                                    'aprovado'
+                                                                    ? 'green'
+                                                                    : selectedCandidate
+                                                                        .analise
+                                                                        .status ===
+                                                                        'recusado'
+                                                                        ? 'red'
+                                                                        : selectedCandidate
+                                                                            .analise
+                                                                            .status ===
+                                                                            'entrevista'
+                                                                            ? 'blue'
+                                                                            : 'default'
+                                                            }
+                                                        >
+                                                            {selectedCandidate
+                                                                .analise.status ===
+                                                                'aprovado'
+                                                                ? 'Aprovado'
+                                                                : selectedCandidate
+                                                                    .analise
+                                                                    .status ===
+                                                                    'recusado'
+                                                                    ? 'Recusado'
+                                                                    : selectedCandidate
+                                                                        .analise
+                                                                        .status ===
+                                                                        'entrevista'
+                                                                        ? 'Entrevista'
+                                                                        : 'Sem status'}
+                                                        </Tag>
+                                                    </div>
+                                                )}
 
                                             {/* Resumo do CV */}
                                             {selectedCandidate.analise
                                                 .cv_resumo && (
-                                                <div className="mt-6">
-                                                    <h3 className="text-lg font-semibold mb-4">
-                                                        Análise do Currículo
-                                                    </h3>
-                                                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 prose max-w-none overflow-y-auto max-h-96">
-                                                        <ReactMarkdown
-                                                            components={{
-                                                                h2: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <h3
-                                                                        className="text-xl font-bold mt-4 mb-2 text-primary"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                                h3: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <h4
-                                                                        className="text-lg font-semibold mt-3 mb-2 text-gray-800"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                                strong: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <strong
-                                                                        className="text-red-600 font-medium"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                                ul: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <ul
-                                                                        className="list-disc pl-6 mb-4"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                                li: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <li
-                                                                        className="mb-2"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                                p: ({
-                                                                    ...props
-                                                                }) => (
-                                                                    <p
-                                                                        className="mb-3 text-gray-700 leading-relaxed"
-                                                                        {...props}
-                                                                    />
-                                                                ),
-                                                            }}
-                                                            rehypePlugins={[
-                                                                rehypeRaw,
-                                                            ]}
-                                                        >
-                                                            {selectedCandidate.analise.cv_resumo
-                                                                .replace(
-                                                                    /\\n/g,
-                                                                    '\n'
-                                                                )
-                                                                .replace(
-                                                                    /\*\*/g,
-                                                                    '**'
-                                                                )
-                                                                .replace(
-                                                                    /## /g,
-                                                                    '### '
-                                                                )}
-                                                        </ReactMarkdown>
+                                                    <div className="mt-6">
+                                                        <h3 className="text-lg font-semibold mb-4">
+                                                            Análise do Currículo
+                                                        </h3>
+                                                        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 prose max-w-none overflow-y-auto max-h-96">
+                                                            <ReactMarkdown
+                                                                components={{
+                                                                    h2: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <h3
+                                                                            className="text-xl font-bold mt-4 mb-2 text-primary"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                    h3: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <h4
+                                                                            className="text-lg font-semibold mt-3 mb-2 text-gray-800"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                    strong: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <strong
+                                                                            className="text-red-600 font-medium"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                    ul: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <ul
+                                                                            className="list-disc pl-6 mb-4"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                    li: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <li
+                                                                            className="mb-2"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                    p: ({
+                                                                        ...props
+                                                                    }) => (
+                                                                        <p
+                                                                            className="mb-3 text-gray-700 leading-relaxed"
+                                                                            {...props}
+                                                                        />
+                                                                    ),
+                                                                }}
+                                                                rehypePlugins={[
+                                                                    rehypeRaw,
+                                                                ]}
+                                                            >
+                                                                {selectedCandidate.analise.cv_resumo
+                                                                    .replace(
+                                                                        /\\n/g,
+                                                                        '\n'
+                                                                    )
+                                                                    .replace(
+                                                                        /\*\*/g,
+                                                                        '**'
+                                                                    )
+                                                                    .replace(
+                                                                        /## /g,
+                                                                        '### '
+                                                                    )}
+                                                            </ReactMarkdown>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
 
                                             {!selectedCandidate.analise.score &&
                                                 !selectedCandidate.analise
@@ -853,16 +863,16 @@ export default function VacancyCandidatesPage() {
                                                         .status === 'aprovado'
                                                         ? 'text-green-500 font-medium'
                                                         : selectedCandidate
+                                                            .analise
+                                                            .status ===
+                                                            'recusado'
+                                                            ? 'text-red-500 font-medium'
+                                                            : selectedCandidate
                                                                 .analise
                                                                 .status ===
-                                                            'recusado'
-                                                          ? 'text-red-500 font-medium'
-                                                          : selectedCandidate
-                                                                  .analise
-                                                                  .status ===
-                                                              'entrevista'
-                                                            ? 'text-blue-500 font-medium'
-                                                            : 'font-medium'
+                                                                'entrevista'
+                                                                ? 'text-blue-500 font-medium'
+                                                                : 'font-medium'
                                                 }
                                             >
                                                 Status
@@ -874,179 +884,179 @@ export default function VacancyCandidatesPage() {
                                             {/* Conteúdo para candidato em entrevista */}
                                             {selectedCandidate.analise
                                                 .status === 'entrevista' && (
-                                                <>
-                                                    <h2 className="text-xl font-bold text-blue-600 mb-4">
-                                                        Candidato para
-                                                        Entrevista
-                                                    </h2>
-                                                    <p className="mb-4">
-                                                        O candidato foi
-                                                        selecionado para a etapa
-                                                        de entrevista.
-                                                    </p>
+                                                    <>
+                                                        <h2 className="text-xl font-bold text-blue-600 mb-4">
+                                                            Candidato para
+                                                            Entrevista
+                                                        </h2>
+                                                        <p className="mb-4">
+                                                            O candidato foi
+                                                            selecionado para a etapa
+                                                            de entrevista.
+                                                        </p>
 
-                                                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
-                                                        <h3 className="text-lg font-medium text-blue-700 mb-2">
-                                                            Próximos Passos:
-                                                        </h3>
-                                                        <ul className="list-disc pl-5 space-y-2">
-                                                            <li>
-                                                                Agendar
-                                                                entrevista com o
-                                                                candidato
-                                                            </li>
-                                                            <li>
-                                                                Preparar
-                                                                questões
-                                                                específicas
-                                                                baseadas no
-                                                                currículo
-                                                            </li>
-                                                            <li>
-                                                                Verificar
-                                                                disponibilidade
-                                                                do gestor da
-                                                                vaga
-                                                            </li>
-                                                            <li>
-                                                                Enviar e-mail de
-                                                                confirmação após
-                                                                o agendamento
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+                                                            <h3 className="text-lg font-medium text-blue-700 mb-2">
+                                                                Próximos Passos:
+                                                            </h3>
+                                                            <ul className="list-disc pl-5 space-y-2">
+                                                                <li>
+                                                                    Agendar
+                                                                    entrevista com o
+                                                                    candidato
+                                                                </li>
+                                                                <li>
+                                                                    Preparar
+                                                                    questões
+                                                                    específicas
+                                                                    baseadas no
+                                                                    currículo
+                                                                </li>
+                                                                <li>
+                                                                    Verificar
+                                                                    disponibilidade
+                                                                    do gestor da
+                                                                    vaga
+                                                                </li>
+                                                                <li>
+                                                                    Enviar e-mail de
+                                                                    confirmação após
+                                                                    o agendamento
+                                                                </li>
+                                                            </ul>
+                                                        </div>
 
-                                                    <Button
-                                                        type="primary"
-                                                        icon={<EmailIcon />}
-                                                        onClick={() => {
-                                                            handleModalClose();
-                                                            showEmailModal(
-                                                                selectedCandidate
-                                                            );
-                                                        }}
-                                                        className="bg-blue-500 hover:bg-blue-600"
-                                                    >
-                                                        Enviar E-mail de
-                                                        Agendamento
-                                                    </Button>
-                                                </>
-                                            )}
+                                                        <Button
+                                                            type="primary"
+                                                            icon={<EmailIcon />}
+                                                            onClick={() => {
+                                                                handleModalClose();
+                                                                showEmailModal(
+                                                                    selectedCandidate
+                                                                );
+                                                            }}
+                                                            className="bg-blue-500 hover:bg-blue-600"
+                                                        >
+                                                            Enviar E-mail de
+                                                            Agendamento
+                                                        </Button>
+                                                    </>
+                                                )}
 
                                             {/* Conteúdo para candidato aprovado */}
                                             {selectedCandidate.analise
                                                 .status === 'aprovado' && (
-                                                <>
-                                                    <h2 className="text-xl font-bold text-green-600 mb-4">
-                                                        Candidato Aprovado
-                                                    </h2>
-                                                    <p className="mb-4">
-                                                        O candidato foi aprovado
-                                                        para a vaga.
-                                                    </p>
+                                                    <>
+                                                        <h2 className="text-xl font-bold text-green-600 mb-4">
+                                                            Candidato Aprovado
+                                                        </h2>
+                                                        <p className="mb-4">
+                                                            O candidato foi aprovado
+                                                            para a vaga.
+                                                        </p>
 
-                                                    <div className="bg-green-50 p-4 rounded-lg border border-green-200 mb-4">
-                                                        <h3 className="text-lg font-medium text-green-700 mb-2">
-                                                            Próximos Passos:
-                                                        </h3>
-                                                        <ul className="list-disc pl-5 space-y-2">
-                                                            <li>
-                                                                Comunicar a
-                                                                aprovação ao
-                                                                candidato
-                                                            </li>
-                                                            <li>
-                                                                Solicitar
-                                                                documentação
-                                                                necessária
-                                                            </li>
-                                                            <li>
-                                                                Agendar exames
-                                                                admissionais
-                                                            </li>
-                                                            <li>
-                                                                Preparar o
-                                                                processo de
-                                                                integração
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                        <div className="bg-green-50 p-4 rounded-lg border border-green-200 mb-4">
+                                                            <h3 className="text-lg font-medium text-green-700 mb-2">
+                                                                Próximos Passos:
+                                                            </h3>
+                                                            <ul className="list-disc pl-5 space-y-2">
+                                                                <li>
+                                                                    Comunicar a
+                                                                    aprovação ao
+                                                                    candidato
+                                                                </li>
+                                                                <li>
+                                                                    Solicitar
+                                                                    documentação
+                                                                    necessária
+                                                                </li>
+                                                                <li>
+                                                                    Agendar exames
+                                                                    admissionais
+                                                                </li>
+                                                                <li>
+                                                                    Preparar o
+                                                                    processo de
+                                                                    integração
+                                                                </li>
+                                                            </ul>
+                                                        </div>
 
-                                                    <Button
-                                                        type="primary"
-                                                        icon={<EmailIcon />}
-                                                        onClick={() => {
-                                                            handleModalClose();
-                                                            showEmailModal(
-                                                                selectedCandidate
-                                                            );
-                                                        }}
-                                                        className="bg-green-500 hover:bg-green-600"
-                                                    >
-                                                        Enviar E-mail de
-                                                        Aprovação
-                                                    </Button>
-                                                </>
-                                            )}
+                                                        <Button
+                                                            type="primary"
+                                                            icon={<EmailIcon />}
+                                                            onClick={() => {
+                                                                handleModalClose();
+                                                                showEmailModal(
+                                                                    selectedCandidate
+                                                                );
+                                                            }}
+                                                            className="bg-green-500 hover:bg-green-600"
+                                                        >
+                                                            Enviar E-mail de
+                                                            Aprovação
+                                                        </Button>
+                                                    </>
+                                                )}
 
                                             {/* Conteúdo para candidato recusado */}
                                             {selectedCandidate.analise
                                                 .status === 'recusado' && (
-                                                <>
-                                                    <h2 className="text-xl font-bold text-red-600 mb-4">
-                                                        Candidato Recusado
-                                                    </h2>
-                                                    <p className="mb-4">
-                                                        O candidato não foi
-                                                        selecionado para
-                                                        prosseguir no processo.
-                                                    </p>
+                                                    <>
+                                                        <h2 className="text-xl font-bold text-red-600 mb-4">
+                                                            Candidato Recusado
+                                                        </h2>
+                                                        <p className="mb-4">
+                                                            O candidato não foi
+                                                            selecionado para
+                                                            prosseguir no processo.
+                                                        </p>
 
-                                                    <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
-                                                        <h3 className="text-lg font-medium text-red-700 mb-2">
-                                                            Motivos possíveis:
-                                                        </h3>
-                                                        <ul className="list-disc pl-5 space-y-2">
-                                                            <li>
-                                                                Perfil não
-                                                                compatível com a
-                                                                vaga
-                                                            </li>
-                                                            <li>
-                                                                Experiência
-                                                                insuficiente
-                                                                para os
-                                                                requisitos
-                                                            </li>
-                                                            <li>
-                                                                Outros
-                                                                candidatos com
-                                                                melhor adequação
-                                                            </li>
-                                                            <li>
-                                                                Disponibilidade
-                                                                incompatível com
-                                                                a necessidade
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                        <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
+                                                            <h3 className="text-lg font-medium text-red-700 mb-2">
+                                                                Motivos possíveis:
+                                                            </h3>
+                                                            <ul className="list-disc pl-5 space-y-2">
+                                                                <li>
+                                                                    Perfil não
+                                                                    compatível com a
+                                                                    vaga
+                                                                </li>
+                                                                <li>
+                                                                    Experiência
+                                                                    insuficiente
+                                                                    para os
+                                                                    requisitos
+                                                                </li>
+                                                                <li>
+                                                                    Outros
+                                                                    candidatos com
+                                                                    melhor adequação
+                                                                </li>
+                                                                <li>
+                                                                    Disponibilidade
+                                                                    incompatível com
+                                                                    a necessidade
+                                                                </li>
+                                                            </ul>
+                                                        </div>
 
-                                                    <Button
-                                                        type="primary"
-                                                        icon={<EmailIcon />}
-                                                        onClick={() => {
-                                                            handleModalClose();
-                                                            showEmailModal(
-                                                                selectedCandidate
-                                                            );
-                                                        }}
-                                                        className="bg-red-500 hover:bg-red-600"
-                                                    >
-                                                        Enviar E-mail de
-                                                        Feedback
-                                                    </Button>
-                                                </>
-                                            )}
+                                                        <Button
+                                                            type="primary"
+                                                            icon={<EmailIcon />}
+                                                            onClick={() => {
+                                                                handleModalClose();
+                                                                showEmailModal(
+                                                                    selectedCandidate
+                                                                );
+                                                            }}
+                                                            className="bg-red-500 hover:bg-red-600"
+                                                        >
+                                                            Enviar E-mail de
+                                                            Feedback
+                                                        </Button>
+                                                    </>
+                                                )}
                                         </div>
                                     </TabPane>
                                 )}

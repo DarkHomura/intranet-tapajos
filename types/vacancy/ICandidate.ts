@@ -13,4 +13,7 @@ export interface ICandidate {
     file_cv: string;
     is_analizado: boolean;
     candidate?: ICandidate;
+    cargo_atual:string
+    loja_setor:string 
+    bairro:string
 }

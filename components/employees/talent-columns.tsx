@@ -13,6 +13,7 @@ interface TalentCandidate {
     file_perfil: string;
     file_cv?: string;
     is_analizado: boolean;
+    bairro:string
 }
 
 interface TalentAnalysis {
@@ -50,6 +51,12 @@ export const talentsColumns = [
         title: 'Telefone',
         dataIndex: ['candidate', 'telefone'],
         key: 'telefone',
+    },
+    {
+        title: 'Bairro',
+        dataIndex: ['candidate', 'bairro'],
+        key: 'bairro',
+        sorter: (a:TalentData, b:TalentData) => a.candidate?.bairro.localeCompare(b.candidate.bairro),
     },
     {
         title: 'Primeira Experiência',
