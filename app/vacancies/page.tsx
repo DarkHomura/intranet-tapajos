@@ -58,7 +58,7 @@ interface TalentCandidate {
     file_cv?: string;
     is_analizado: boolean;
 
-    bairro:string
+    bairro: string
 }
 
 interface TalentAnalysis {
@@ -106,7 +106,7 @@ export default function VacanciesPage() {
         }
     }, [error]);
 
-    {/*Retorno API Candidatos*/}
+    {/*Retorno API Candidatos*/ }
     useEffect(() => {
         if (allTalents.data.length > 0) {
             const filtered = allTalents.data.filter((talent: TalentData) => {
@@ -120,7 +120,7 @@ export default function VacanciesPage() {
                 return (
                     nome.includes(searchLower) ||
                     email.includes(searchLower) ||
-                    cpf.includes(searchLower) || 
+                    cpf.includes(searchLower) ||
 
                     bairro.includes(searchLower)
                 );
@@ -332,27 +332,13 @@ export default function VacanciesPage() {
                     changedFields.nome_vaga = currentVacancy.nome_vaga;
                 }
 
-                /*if (values.isInternalSelection !== currentVacancy.isInternalSelection) {
-                    if (values.isInternalSelection) {
-                        if (!values.nome_vaga.includes('- INTERNA')) {
-                            changedFields.title = `${values.nome_vaga} - INTERNA`;
-                        }
-                    } else {
-                        changedFields.title = values.nome_vaga.replace(
-                            ' - INTERNA',
-                            ''
-                        );
-                    }
-                }
-                    */
+                {/*Alteração*/ }
 
-                {/*Alteração*/}
-
-                if(!changedFields.salary && changedFields.salary !== ''){
+                if (!changedFields.salary && changedFields.salary !== '') {
                     changedFields.salary = currentVacancy.salary
                 }
 
-                if(!changedFields.location && changedFields.location !== ''){
+                if (!changedFields.location && changedFields.location !== '') {
                     changedFields.location = currentVacancy.location
                 }
 
@@ -371,9 +357,9 @@ export default function VacanciesPage() {
                 refreshVacancies();
             } else {
                 let nome_vaga = values.nome_vaga;
-                
+
                 //if (values.isInternalSelection /*&& !nome_vaga.includes('- INTERNA'*/) {
-                    //nome_vaga = `${nome_vaga} - Vaga INTERNA`;
+                //nome_vaga = `${nome_vaga} - Vaga INTERNA`;
                 //}
 
                 const vacancyData: CreateVacancyPayload = {
@@ -462,10 +448,10 @@ export default function VacanciesPage() {
             title: 'Vaga',
             dataIndex: 'nome_vaga',
             key: 'nome_vaga',
-            sorter: (a: Vacancy, b: Vacancy) =>{
-                return a?.nome_vaga.localeCompare(b?.nome_vaga || " ")
+            sorter: (a: Vacancy, b: Vacancy) => {
+                return (a?.nome_vaga ?? ' ').localeCompare(b?.nome_vaga || " ")
             }
-                //a.nome_vaga.localeCompare(b.nome_vaga),
+            //a.nome_vaga.localeCompare(b.nome_vaga),
         },
         {
             title: 'Departamento',
@@ -481,7 +467,7 @@ export default function VacanciesPage() {
             onFilter: (value: string, record: Vacancy) =>
                 record.department === value,
         },
-        
+
         {
             title: 'Data de Início',
             dataIndex: 'data_inicial',
@@ -521,11 +507,7 @@ export default function VacanciesPage() {
                 { text: 'Inativa', value: 'inactive' },
             ],
             onFilter: (value: string, record: Vacancy) => {
-                const today = dayjs().format('YYYY-MM-DD');
-                const isActive =
-                    record.data_inicial <= today &&
-                    (!record.data_final || record.data_final >= today);
-
+                const isActive = record.is_ativo;
                 return (
                     (value === 'active' && isActive) ||
                     (value === 'inactive' && !isActive)
@@ -597,14 +579,13 @@ export default function VacanciesPage() {
                 <Sidebar isOpen={isSidebarOpen} />
 
                 <main
-                    className={`pt-16 transition-all duration-300 ${
-                        isSidebarOpen ? 'ml-64' : 'ml-16'
-                    }`}
+                    className={`pt-16 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-16'
+                        }`}
                 >
                     <div className="p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-2xl font-bold text-primary">
-                                Gerenciamento de Vagas : 
+                                Gerenciamento de Vagas :
                             </h1>
                             <Button
                                 type="primary"
@@ -883,7 +864,7 @@ export default function VacanciesPage() {
                                     },
                                 ]}
                             >
-                                <Input/>
+                                <Input />
                             </Form.Item>
 
                             <Form.Item

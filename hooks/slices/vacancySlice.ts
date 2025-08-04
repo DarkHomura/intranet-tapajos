@@ -626,6 +626,7 @@ const vacancySlice = createSlice({
             state.error = action.payload;
         },
         resetEmailStatus(state) {
+            console.log("Reset")
             state.emailStatus = {
                 loading: false,
                 success: false,

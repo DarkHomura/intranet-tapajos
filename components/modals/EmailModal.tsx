@@ -26,6 +26,7 @@ import {
 } from '@/hooks/slices/vacancySlice';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
+import { values } from 'lodash';
 
 interface EmailModalProps {
     isVisible: boolean;
@@ -63,14 +64,22 @@ const EmailModal: React.FC<EmailModalProps> = ({
     }, [candidate, form, isVisible, vacancyName]);
 
     useEffect(() => {
-        if (!isVisible) {
+        console.log(isVisible)
+        console.log("Here 2")
+        console.log(emailStatus.success)
+        if (isVisible) {
+            console.log("Here")
+            console.log(emailStatus.success)
             dispatch(resetEmailStatus());
+            console.log(emailStatus.success)
         }
     }, [isVisible, dispatch]);
 
     useEffect(() => {
         if (emailStatus.success) {
             message.success('E-mail enviado com sucesso!');
+            dispatch(resetEmailStatus());
+            console.log('Quebrou')
             onClose();
         }
 
