@@ -89,8 +89,10 @@ export function TableTrade() {
         });
 
     const handleViewCampaign = (id: string) => {
-        dispatch(fetchCampaignById(id)).then(() => {
-            const escalaData = currentCampaign?.escala || [];
+        dispatch(fetchCampaignById(id)).then((data) => {
+
+            //const escalaData = currentCampaign?.escala || [];
+            const escalaData = data.payload?.escala || [];
 
             let metaGeralRange: any = [];
             let metaVendedorRange: any = [];
@@ -152,31 +154,38 @@ export function TableTrade() {
                             </h3>
                             <p>
                                 <strong>Nome:</strong>{' '}
-                                {currentCampaign?.campanha?.nome}
+                                {/*currentCampaign?.campanha?.nome*/
+                                data.payload?.campanha?.nome}
                             </p>
                             <p>
                                 <strong>Data Inicial:</strong>{' '}
-                                {currentCampaign?.campanha?.datainicial}
+                                {/*currentCampaign?.campanha?.datainicial*/
+                                data.payload?.campanha?.datainicial}
                             </p>
                             <p>
                                 <strong>Data Final:</strong>{' '}
-                                {currentCampaign?.campanha?.datafinal}
+                                {/*currentCampaign?.campanha?.datafinal*/
+                                data.payload?.campanha?.datainicial}
                             </p>
                             <p>
                                 <strong>Valor Total:</strong>{' '}
-                                {currentCampaign?.campanha?.valor_total}
+                                {/*currentCampaign?.campanha?.valor_total*/
+                                data.payload?.campanha?.valor_total}
                             </p>
                             <p>
                                 <strong>Usuário Lançamento:</strong>{' '}
-                                {currentCampaign?.campanha?.userlanc}
+                                {/*currentCampaign?.campanha?.userlanc*/
+                                data.payload?.campanha?.userlanc}
                             </p>
                             <p>
                                 <strong>Data Lançamento:</strong>{' '}
-                                {currentCampaign?.campanha?.datalanc}
+                                {/*currentCampaign?.campanha?.datalanc*/
+                                data.payload?.campanha?.datalanc}
                             </p>
                             <p>
                                 <strong>Status:</strong>{' '}
-                                {currentCampaign?.campanha?.status
+                                {/*currentCampaign?.campanha?.status*/
+                                data.payload?.campanha?.status
                                     ? 'Ativo'
                                     : 'Inativo'}
                             </p>
@@ -186,7 +195,8 @@ export function TableTrade() {
                             <h3 className="text-lg font-bold text-green-600">
                                 Participantes
                             </h3>
-                            {currentCampaign?.participantes?.map(
+                            {/*currentCampaign?.participantes?.map*/
+                            data.payload?.participantes?.map(
                                 (participante: IParticipants) => (
                                     <div
                                         key={participante.id}
@@ -231,7 +241,8 @@ export function TableTrade() {
                             <h3 className="text-lg font-bold text-green-600">
                                 Itens
                             </h3>
-                            {currentCampaign?.itens?.map((item: IProduct) => (
+                            {/*currentCampaign?.itens?.map((item: IProduct) => (*/
+                            data.payload?.itens?.map((item: IProduct) => (
                                 <div key={item.id} className="mb-2">
                                     <p>
                                         <strong>Nome:</strong> {item.nome}
