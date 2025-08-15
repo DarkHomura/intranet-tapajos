@@ -399,6 +399,7 @@ export const fetchProductsByType = createAsyncThunk(
                 type === 'produto' ? '/busca_produtos' : '/busca_marcas';
             const response = await apiInstance.post(endpoint, { busca });
             const data = JSON.parse(response.data);
+            console.log(data)
             return data;
         } catch (error) {
             console.error(`Error fetching ${type}s:`, error);

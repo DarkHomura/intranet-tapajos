@@ -46,6 +46,7 @@ import {
 import { fetchProductsByType } from '@/hooks/slices/trade/tradeSlice';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useParams } from 'next/navigation';
+import { Label } from '@radix-ui/react-label';
 
 const { TabPane } = Tabs;
 
@@ -573,9 +574,7 @@ export default function NegotiationsRegistration() {
                             ...tabela,
                             id_item_negociacao: idItemReal,
                         };
-
-                        console.log("Produtos Array")
-                        console.log(productsArray)
+                        
                         produtosArray.forEach((produto, idx) => {
                             if (
                                 produto.id_item === tabela.id ||
@@ -587,11 +586,7 @@ export default function NegotiationsRegistration() {
                                 };
                             }
                         });
-                        console.log("Produtos Array")
-                        console.log(productsArray)
-
-                        console.log("Empresas Array")
-                        console.log(empresasArray)
+                        
                         empresasArray.forEach((empresa, idx) => {
                             if (
                                 empresa.id_item === tabela.id ||
@@ -895,7 +890,7 @@ export default function NegotiationsRegistration() {
                                     >
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-md font-bold text-green-600 mb-3">
-                                                Item: {tabela.descricao} (#
+                                                Ativo: {tabela.descricao} (#
                                                 {tabela.id})
                                             </h3>
                                             <AntButton
@@ -906,6 +901,9 @@ export default function NegotiationsRegistration() {
                                                 }
                                             />
                                         </div>
+
+                                        
+                                        
 
                                         <Tabs
                                             activeKey={
@@ -1055,8 +1053,8 @@ export default function NegotiationsRegistration() {
                                                             (produto) => ({
                                                                 value: produto.codprod,
                                                                 label:
-                                                                    produto.descricao ||
-                                                                    produto.nome ||
+                                                                    produto.id + " - " + produto.codprod + " - " +produto.descricao ||
+                                                                    produto.id + " - " + produto.codprod + " - " +produto.descricao ||
                                                                     String(
                                                                         produto.id
                                                                     ),

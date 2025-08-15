@@ -139,6 +139,7 @@ export const fetchProdutos = createAsyncThunk(
             const response = await apiInstance.post('busca_produtos', {
                 busca,
             });
+            console.log(response.data)
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -209,17 +210,10 @@ export const fetchNegotiationProdutos = createAsyncThunk(
     'tradeNegotiations/fetchProdutosItem',
     async (negociacaoId: number, { rejectWithValue }) => {
         try {
-            /*
-            console.log(
-                'Chamando fetchNegotiationProdutos para negociação:',
-                negociacaoId
-            );*/
             const response = await apiInstance.get(
                 `varejo/NegociacaoVarejoProduto/${negociacaoId}`
             );
-            /*console.log('Resposta de fetchNegotiationProdutos:', response.data);*/
-
-            // Garantir que retornamos sempre um array, mesmo se a API retornar um único objeto
+            console.log(response.data)
             const data = response.data;
             return Array.isArray(data) ? data : data ? [data] : [];
         } catch (error) {
