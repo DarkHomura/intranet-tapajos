@@ -47,6 +47,7 @@ import { fetchProductsByType } from '@/hooks/slices/trade/tradeSlice';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useParams } from 'next/navigation';
 import { Label } from '@radix-ui/react-label';
+import * as XLSX from 'xlsx'
 
 const { TabPane } = Tabs;
 
@@ -120,6 +121,7 @@ export default function NegotiationsRegistration() {
     const filiaisArray = Array.isArray(filiais) ? (filiais as IFilialExtended[]) : [];
     const params = useParams();
     const id = params.tradeNegotiationsId;
+    const [fileName, setFileName] = useState()
 
     useEffect(() => {
         dispatch(fetchNegotiationCampaigns());
@@ -321,15 +323,6 @@ export default function NegotiationsRegistration() {
             message.error('Por favor, selecione um item ou crie um novo.');
         }
     };
-
-    /*
-    const toggleNewItemInput = () => {
-        setShowNewItemInput(!showNewItemInput);
-        setSelectedItem(null);
-        setItemDescricao('');
-        setItemSigla('');
-    };
-    */
 
     const handleTabChange = (tabNumber: number, activeKey: string) => {
         setActiveTabKeys((prev) => ({
@@ -574,7 +567,7 @@ export default function NegotiationsRegistration() {
                             ...tabela,
                             id_item_negociacao: idItemReal,
                         };
-                        
+
                         produtosArray.forEach((produto, idx) => {
                             if (
                                 produto.id_item === tabela.id ||
@@ -586,7 +579,7 @@ export default function NegotiationsRegistration() {
                                 };
                             }
                         });
-                        
+
                         empresasArray.forEach((empresa, idx) => {
                             if (
                                 empresa.id_item === tabela.id ||
@@ -732,6 +725,33 @@ export default function NegotiationsRegistration() {
 
         setTables(tables.filter((table) => table.id !== tableId));
     };
+
+    const handleGetExcelFile = async (e: any) => {
+        const file = e.target.files[0]
+        setFileName(file.name)
+
+        const data = await file.arrayBuffer()
+        const workBook = XLSX.readFile(data, { sheetRows: 5 })
+
+        console.log(workBook)
+
+        //FILTRO DE ABAS EXCEL
+        const workSheetLojas = workBook.Sheets[workBook.SheetNames[0]]
+        const workSheetProdutos = workBook.Sheets[workBook.SheetNames[1]]
+        const jsonDataLojas: any = XLSX.utils.sheet_to_json(workSheetLojas)
+        const jsonDataProdutos: any = XLSX.utils.sheet_to_json(workSheetProdutos)
+
+        jsonDataLojas.map((item: any) => {
+            console.log(item)
+            console.log(item.LOJA)
+        })
+
+        jsonDataProdutos.map((item: any) => {
+            console.log(item)
+            console.log(item.PRODUTO)
+        })
+
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -902,8 +922,9 @@ export default function NegotiationsRegistration() {
                                             />
                                         </div>
 
-                                        
-                                        
+                                        <Label className='text-sm text-gray-500'>Importar Arquivo excel para preenchimento dos dados</Label>
+                                        <Input className='m-2' type='file' onChange={(e) => handleGetExcelFile(e)} />
+
 
                                         <Tabs
                                             activeKey={
@@ -1053,8 +1074,8 @@ export default function NegotiationsRegistration() {
                                                             (produto) => ({
                                                                 value: produto.codprod,
                                                                 label:
-                                                                    produto.id + " - " + produto.codprod + " - " +produto.descricao ||
-                                                                    produto.id + " - " + produto.codprod + " - " +produto.descricao ||
+                                                                    produto.id + " - " + produto.codprod + " - " + produto.descricao ||
+                                                                    produto.id + " - " + produto.codprod + " - " + produto.descricao ||
                                                                     String(
                                                                         produto.id
                                                                     ),
