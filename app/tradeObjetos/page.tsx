@@ -94,7 +94,7 @@ export default (() => {
                         <div className="bg-white p-4 rounded shadow">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-bold text-green-600">
-                                    Itens da Campanha
+                                    Ativos da Campanha
                                 </h2>
                             </div>
                             <div className="flex flex-col gap-2">

@@ -788,7 +788,7 @@ export default function NegotiationsRegistration() {
                         <div className="bg-white p-4 rounded shadow">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-bold text-green-600">
-                                    Itens da Campanha
+                                    Ativos da Campanha
                                 </h2>
                             </div>
 
@@ -797,7 +797,7 @@ export default function NegotiationsRegistration() {
                                 {/* {!showNewItemInput ? ( */}
 
                                 <div className="flex gap-2">
-                                    <Select showSearch className="flex-1" placeholder="Selecione um item..." value={selectedItem?.id}
+                                    <Select showSearch className="flex-1" placeholder="Selecione um Ativo..." value={selectedItem?.id}
                                         onChange={(value) => {
                                             const item =
                                                 itensObjetoArray.find(
@@ -834,7 +834,7 @@ export default function NegotiationsRegistration() {
                                         className="bg-green-500 hover:bg-green-600"
                                         disabled={!selectedItem}
                                     >
-                                        Adicionar Item
+                                        Adicionar Ativo
                                     </Button>
                                 </div>
 
@@ -885,7 +885,7 @@ export default function NegotiationsRegistration() {
                             {tables.length === 0 ? (
                                 <div className="text-center py-4 text-gray-500">
                                     Nenhum item adicionado. Clique em "Adicionar
-                                    Item" para começar.
+                                    Ativo" para começar.
                                 </div>
                             ) : (
                                 tables.map((tabela) => (

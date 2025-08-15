@@ -29,10 +29,10 @@ export default function TradeNegotiationsList() {
                             <div className="flex justify-between items-center mb-6">
                                 <div>
                                     <h1 className="text-2xl font-bold text-primary">
-                                        Items de Campanha
+                                        Ativos de Campanha
                                     </h1>
                                     <p className="text-muted-foreground mt-1">
-                                        Listagem de Objetos
+                                        Listagem de Ativos
                                     </p>
                                 </div>
                             </div>

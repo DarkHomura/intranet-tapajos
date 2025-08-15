@@ -50,7 +50,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
                 {
                     icon: <FileChartColumnIncreasing className="h-6 w-6" />,
                     key: '/tradeObjetos',
-                    label: <Link href="/tradeObjetos/list">Objetos de Campanha</Link>,
+                    label: <Link href="/tradeObjetos/list">Ativos de Campanha</Link>,
                     className: 'iconsidebar',
                 },
             ],
