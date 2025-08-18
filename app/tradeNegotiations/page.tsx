@@ -418,11 +418,30 @@ export default function NegotiationsRegistration() {
         setSelectedProduto(null);
         setProdutoInput({ unidades: 0, valor: 0 });
         //message.success('Produto adicionado com sucesso!');
-
     }
 
-    const handleExcelEmpresa = () =>{
+    const handleExcelEmpresa = (filialId: number, filialLoja: string, tableId: number) =>{
+        const empresasDoItem = getEmpresasDoItem(tableId);
+        const jaExiste = empresasDoItem.some((e) => e.id_empresa === filialId);
 
+        if (jaExiste) {
+            message.warning('Esta loja já foi adicionada a este item.');
+            setSelectedLoja(null);
+            return;
+        }
+
+        const novaEmpresa = {
+            id_negociacao: negociacaoId || 0,
+            id_item: tableId,
+            id_item_original: tableId,
+            id_empresa: filialId,
+            descricao: filialLoja,
+        };
+
+        dispatch(addEmpresaLocal(novaEmpresa));
+        setSelectedLoja(null);
+
+        //message.success('Loja adicionada com sucesso!');
     }
 
     const handleRemoveEmpresa = (id?: number) => {
@@ -770,7 +789,7 @@ export default function NegotiationsRegistration() {
         jsonDataLojas.map((item: any) => {
             console.log(item)
             console.log(item.LOJA)
-            handleAddEmpresa(item.IDEMPRESA, item.LOJA, 1)
+            handleExcelEmpresa(item.IDEMPRESA, item.LOJA, 1)
         })
 
         const arrayProduct = productsArray
