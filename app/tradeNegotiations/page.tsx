@@ -123,6 +123,7 @@ export default function NegotiationsRegistration() {
     const id = params.tradeNegotiationsId;
     const [fileName, setFileName] = useState()
 
+
     useEffect(() => {
         dispatch(fetchNegotiationCampaigns());
         dispatch(fetchItensObjeto());
@@ -207,8 +208,6 @@ export default function NegotiationsRegistration() {
                         (emp) => emp.id_item === item.id
                     )
                     : [];
-
-                console.log(empresasDoItem)
 
                 for (const empresa of empresasDoItem) {
                     const empresaLocalFormat = {
@@ -336,8 +335,10 @@ export default function NegotiationsRegistration() {
         filialLoja: string,
         tableId: number
     ) => {
+        console.log(tableId)
         const empresasDoItem = getEmpresasDoItem(tableId);
         const jaExiste = empresasDoItem.some((e) => e.id_empresa === filialId);
+
 
         if (jaExiste) {
             message.warning('Esta loja já foi adicionada a este item.');
@@ -360,6 +361,7 @@ export default function NegotiationsRegistration() {
     };
 
     const handleAddProduto = (tableId: number) => {
+        console.log(tableId)
         if (!selectedProduto) {
             message.error('Por favor, selecione um produto.');
             return;
@@ -395,6 +397,33 @@ export default function NegotiationsRegistration() {
         setProdutoInput({ unidades: 0, valor: 0 });
         message.success('Produto adicionado com sucesso!');
     };
+
+
+    const handleExcelProduct = (tableId: number, idProduto:number, produto:string, quantidade:number) => {
+        const produtosDoItem = getProdutosDoItem(tableId);
+        const jaExiste = produtosDoItem.some(
+            (p) => p.id_produto === selectedProduto?.codprod
+        );
+
+        const novoProduto = {
+            id_negociacao: negociacaoId || 0,
+            id_item: tableId,
+            id_item_original: tableId,
+            id_produto: idProduto as number,
+            descricao: produto || '',
+            unidades: quantidade,
+        };
+
+        dispatch(addProdutoLocal(novoProduto));
+        setSelectedProduto(null);
+        setProdutoInput({ unidades: 0, valor: 0 });
+        //message.success('Produto adicionado com sucesso!');
+
+    }
+
+    const handleExcelEmpresa = () =>{
+
+    }
 
     const handleRemoveEmpresa = (id?: number) => {
         if (!id) return;
@@ -696,9 +725,6 @@ export default function NegotiationsRegistration() {
     };
 
     const getProdutosDoItem = (tableId: number) => {
-        /*console.log("Pass")
-        console.log(itensObjeto)*/
-        console.log(produtos)
         const produtosFiltrados = produtosArray.filter(
             (produto) =>
                 produto.id_item === tableId ||
@@ -731,7 +757,7 @@ export default function NegotiationsRegistration() {
         setFileName(file.name)
 
         const data = await file.arrayBuffer()
-        const workBook = XLSX.readFile(data, { sheetRows: 5 })
+        const workBook = XLSX.readFile(data)
 
         console.log(workBook)
 
@@ -744,12 +770,18 @@ export default function NegotiationsRegistration() {
         jsonDataLojas.map((item: any) => {
             console.log(item)
             console.log(item.LOJA)
+            handleAddEmpresa(item.IDEMPRESA, item.LOJA, 1)
         })
 
+        const arrayProduct = productsArray
+
         jsonDataProdutos.map((item: any) => {
-            console.log(item)
+            handleExcelProduct(1,item.IDPRODUTO, item.PRODUTO, item.QUANTIDADE)
+            console.log(item.IDPRODUTO)
             console.log(item.PRODUTO)
+            console.log(item.QUANTIDADE)
         })
+        dispatch(fetchProductsByType({ busca: '', type: 'produto' }));
 
     }
 
@@ -922,6 +954,10 @@ export default function NegotiationsRegistration() {
                                             />
                                         </div>
 
+                                        <p>
+                                            <Label className='text-sm text-gray-500'>Exemplo de planilha de excel para importar: <a target='_blank' href="http://10.2.10.18:8998/index.php/Cadastro_Negocicoes_Trade"> <strong> <i> Clique Aqui </i></strong></a></Label>
+                                        </p>
+
                                         <Label className='text-sm text-gray-500'>Importar Arquivo excel para preenchimento dos dados</Label>
                                         <Input className='m-2' type='file' onChange={(e) => handleGetExcelFile(e)} />
 
@@ -1074,8 +1110,8 @@ export default function NegotiationsRegistration() {
                                                             (produto) => ({
                                                                 value: produto.codprod,
                                                                 label:
-                                                                    produto.id + " - " + produto.codprod + " - " + produto.descricao ||
-                                                                    produto.id + " - " + produto.codprod + " - " + produto.descricao ||
+                                                                    produto.codprod + " - " + produto.descricao ||
+                                                                    produto.codprod + " - " + produto.descricao ||
                                                                     String(
                                                                         produto.id
                                                                     ),
