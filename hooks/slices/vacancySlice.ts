@@ -1,11 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { Vacancy, CreateVacancyPayload } from '@/types/vacancy/IVacancy';
-import {
-    EmailAprovado,
-    EmailEntrevista,
-    EmailRecusado,
-} from '@/types/vacancy/IEmail';
+import {EmailAprovado, EmailEntrevista,EmailRecusado,} from '@/types/vacancy/IEmail';
 
 interface Candidate {
     id: string;
@@ -43,6 +39,7 @@ export interface AllTalent {
         file_perfil: string;
         file_cv?: string;
         is_analizado: boolean;
+        bairro:string
     };
     analise: {
         score: string | number;
@@ -104,7 +101,8 @@ const initialState: VacancyState = {
     },
 };
 
-const API_URL = 'https://api.rh.grupotapajos.com.br';
+//const API_URL = 'https://api.rh.grupotapajos.com.br';
+const API_URL = 'http://localhost:8000';
 
 export const fetchVacancies = createAsyncThunk(
     'vacancy/fetchVacancies',
@@ -124,6 +122,7 @@ export const fetchVacancies = createAsyncThunk(
                 },
             });
 
+            console.log(response.data)
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -137,6 +136,7 @@ export const fetchVacancies = createAsyncThunk(
 export const fetchVacancyById = createAsyncThunk(
     'vacancy/fetchVacancyById',
     async (id: string, { getState, rejectWithValue }) => {
+        console.error("FRONT FETCH")
         try {
             const { auth } = getState() as {
                 auth: { accessToken: string | null };
@@ -151,7 +151,7 @@ export const fetchVacancyById = createAsyncThunk(
                     Authorization: `Bearer ${auth.accessToken}`,
                 },
             });
-
+            console.error(response.data)
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -186,10 +186,14 @@ export const createVacancy = createAsyncThunk(
             const dataWithCreator = {
                 ...vacancyData,
                 criado_por: auth.user?.username || 'Usuário não identificado',
-                departamento_vaga: vacancyData.departamento_vaga || '',
+                departamento_vaga: vacancyData.department || '',
                 requisitos: vacancyData.requisitos || '',
                 diferencial: vacancyData.diferencial || '',
                 nome_vaga: vacancyData.nome_vaga || '',
+                //alteração
+                salary: vacancyData.salary || '',
+                location: vacancyData.location || '',
+
                 limit_candidatos: vacancyData.limit_candidatos || 1,
                 data_inicial:
                     vacancyData.data_inicial ||
@@ -211,14 +215,17 @@ export const createVacancy = createAsyncThunk(
                     }
                 });
 
+                //ALTERAÇÃO
                 const requiredFields = [
                     'departamento_vaga',
                     'requisitos',
                     'nome_vaga',
                     'diferencial',
+                    'salary',
+                    'location',
                     'limit_candidatos',
                     'data_inicial',
-                    'isInternalSelection',
+                    'isInternalSelection'
                 ];
                 requiredFields.forEach((field) => {
                     if (!formData.has(field)) {
@@ -276,6 +283,7 @@ export const updateVacancy = createAsyncThunk(
         { id, data }: { id: string; data: Partial<CreateVacancyPayload> },
         { getState, rejectWithValue }
     ) => {
+        console.log(data)
         try {
             const { auth } = getState() as {
                 auth: { accessToken: string | null };
@@ -295,11 +303,14 @@ export const updateVacancy = createAsyncThunk(
                 }
             });
 
-            if (data.departamento_vaga === '')
+            if (data.department === '')
                 formData.set('departamento_vaga', ' ');
             if (data.requisitos === '') formData.set('requisitos', ' ');
             if (data.diferencial === '') formData.set('diferencial', ' ');
             if (data.nome_vaga === '') formData.set('nome_vaga', ' ');
+            //ALTERAÇÃO
+            if (data.salary === '') formData.set('salary', ' ');
+            if (data.location === '') formData.set('location', ' ')
 
             console.log(
                 'Enviando dados para atualização:',
@@ -383,6 +394,7 @@ export const fetchVacancyCandidates = createAsyncThunk(
                 }
             );
 
+            console.log(response.data)
             return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -614,6 +626,7 @@ const vacancySlice = createSlice({
             state.error = action.payload;
         },
         resetEmailStatus(state) {
+            console.log("Reset")
             state.emailStatus = {
                 loading: false,
                 success: false,

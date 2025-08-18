@@ -13,6 +13,7 @@ interface TalentCandidate {
     file_perfil: string;
     file_cv?: string;
     is_analizado: boolean;
+    bairro:string
 }
 
 interface TalentAnalysis {
@@ -52,6 +53,12 @@ export const talentsColumns = [
         key: 'telefone',
     },
     {
+        title: 'Bairro',
+        dataIndex: ['candidate', 'bairro'],
+        key: 'bairro',
+        sorter: (a:TalentData, b:TalentData) => a.candidate?.bairro.localeCompare(b.candidate.bairro),
+    },
+    {
         title: 'Primeira Experiência',
         dataIndex: ['candidate', 'is_primeiraexperiencia'],
         key: 'is_primeiraexperiencia',
@@ -69,13 +76,9 @@ export const talentsColumns = [
         title: 'Disponível',
         dataIndex: ['candidate', 'is_disponivel'],
         key: 'is_disponivel',
-
-        filters: [
-            { text: 'Sim', value: 'sim' },
-            { text: 'Não', value: 'não' },
-        ],
-        onFilter: (value: string, record: TalentData) =>
-            record.candidate?.is_disponivel === value,
+        sorter: (a:TalentData, b:TalentData) => {
+            return (a?.candidate.is_disponivel ?? ' ').localeCompare(b?.candidate.is_disponivel || ' ')
+        }
     },
     {
         title: 'Analisado',

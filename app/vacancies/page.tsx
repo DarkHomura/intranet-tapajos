@@ -57,6 +57,8 @@ interface TalentCandidate {
     file_perfil: string;
     file_cv?: string;
     is_analizado: boolean;
+
+    bairro: string
 }
 
 interface TalentAnalysis {
@@ -104,6 +106,7 @@ export default function VacanciesPage() {
         }
     }, [error]);
 
+    {/*Retorno API Candidatos*/ }
     useEffect(() => {
         if (allTalents.data.length > 0) {
             const filtered = allTalents.data.filter((talent: TalentData) => {
@@ -111,15 +114,19 @@ export default function VacanciesPage() {
                     talent.candidate?.nome_completo?.toLowerCase() || '';
                 const email = talent.candidate?.email?.toLowerCase() || '';
                 const cpf = talent.candidate?.cpf?.toLowerCase() || '';
+                const bairro = talent.candidate?.bairro?.toLowerCase() || '';
                 const searchLower = searchText.toLowerCase();
 
                 return (
                     nome.includes(searchLower) ||
                     email.includes(searchLower) ||
-                    cpf.includes(searchLower)
+                    cpf.includes(searchLower) ||
+
+                    bairro.includes(searchLower)
                 );
             });
             setFilteredTalents(filtered);
+            console.log(filtered)
         } else {
             setFilteredTalents([]);
         }
@@ -173,7 +180,12 @@ export default function VacanciesPage() {
             setEditingId(record.id);
             form.setFieldsValue({
                 nome_vaga: record.nome_vaga,
-                departamento_vaga: record.departamento_vaga,
+                departamento_vaga: record.department,
+
+                //Alteração
+                salary: record.salary,
+                location: record.location,
+
                 requisitos: record.requisitos
                     .split(',')
                     .map((tag) => tag.trim()),
@@ -239,11 +251,16 @@ export default function VacanciesPage() {
                     changedFields.nome_vaga = values.nome_vaga;
                 }
 
-                if (
-                    values.departamento_vaga !==
-                    currentVacancy.departamento_vaga
-                ) {
-                    changedFields.departamento_vaga = values.departamento_vaga;
+                if (values.departamento_vaga !== currentVacancy.department) {
+                    changedFields.department = values.departamento_vaga;
+                }
+
+                if (values.salary !== currentVacancy.salary) {
+                    changedFields.salary = values.salary;
+                }
+
+                if (values.location !== currentVacancy.location) {
+                    changedFields.location = values.location;
                 }
 
                 if (values.requisitos !== currentVacancy.requisitos) {
@@ -293,11 +310,11 @@ export default function VacanciesPage() {
                 }
 
                 if (
-                    !changedFields.departamento_vaga &&
-                    changedFields.departamento_vaga !== ''
+                    !changedFields.department &&
+                    changedFields.department !== ''
                 ) {
-                    changedFields.departamento_vaga =
-                        currentVacancy.departamento_vaga;
+                    changedFields.department =
+                        currentVacancy.department;
                 }
 
                 if (
@@ -307,40 +324,30 @@ export default function VacanciesPage() {
                     changedFields.requisitos = currentVacancy.requisitos;
                 }
 
-                if (
-                    !changedFields.diferencial &&
-                    changedFields.diferencial !== ''
-                ) {
+                if (!changedFields.diferencial && changedFields.diferencial !== '') {
                     changedFields.diferencial = currentVacancy.diferencial;
                 }
 
-                if (
-                    !changedFields.nome_vaga &&
-                    changedFields.nome_vaga !== ''
-                ) {
+                if (!changedFields.nome_vaga && changedFields.nome_vaga !== '') {
                     changedFields.nome_vaga = currentVacancy.nome_vaga;
                 }
 
-                if (
-                    values.isInternalSelection !==
-                    currentVacancy.isInternalSelection
-                ) {
-                    if (values.isInternalSelection) {
-                        if (!values.nome_vaga.includes('- INTERNA')) {
-                            changedFields.nome_vaga = `${values.nome_vaga} - INTERNA`;
-                        }
-                    } else {
-                        changedFields.nome_vaga = values.nome_vaga.replace(
-                            ' - INTERNA',
-                            ''
-                        );
-                    }
+                {/*Alteração*/ }
+
+                if (!changedFields.salary && changedFields.salary !== '') {
+                    changedFields.salary = currentVacancy.salary
+                }
+
+                if (!changedFields.location && changedFields.location !== '') {
+                    changedFields.location = currentVacancy.location
                 }
 
                 if (!('limit_candidatos' in changedFields)) {
                     changedFields.limit_candidatos =
                         currentVacancy.limit_candidatos;
                 }
+
+                console.log(changedFields)
 
                 await dispatch(
                     updateVacancy({ id: editingId, data: changedFields })
@@ -351,16 +358,13 @@ export default function VacanciesPage() {
             } else {
                 let nome_vaga = values.nome_vaga;
 
-                if (
-                    values.isInternalSelection &&
-                    !nome_vaga.includes('- INTERNA')
-                ) {
-                    nome_vaga = `${nome_vaga} - INTERNA`;
-                }
+                //if (values.isInternalSelection /*&& !nome_vaga.includes('- INTERNA'*/) {
+                //nome_vaga = `${nome_vaga} - Vaga INTERNA`;
+                //}
 
                 const vacancyData: CreateVacancyPayload = {
                     nome_vaga: nome_vaga,
-                    departamento_vaga: values.departamento_vaga,
+                    department: values.departamento_vaga,
                     requisitos: Array.isArray(values.requisitos)
                         ? values.requisitos.join(',')
                         : values.requisitos,
@@ -370,6 +374,8 @@ export default function VacanciesPage() {
                     limit_candidatos: Number(values.limit_candidatos),
                     isInternalSelection: values.isInternalSelection,
                     url_link: values.url_link || null,
+                    location: values.location,
+                    salary: values.salary,
                     data_inicial: values.data_range[0].format('YYYY-MM-DD'),
                     data_final: values.data_range[1]
                         ? values.data_range[1].format('YYYY-MM-DD')
@@ -442,8 +448,10 @@ export default function VacanciesPage() {
             title: 'Vaga',
             dataIndex: 'nome_vaga',
             key: 'nome_vaga',
-            sorter: (a: Vacancy, b: Vacancy) =>
-                a.nome_vaga.localeCompare(b.nome_vaga),
+            sorter: (a: Vacancy, b: Vacancy) => {
+                return (a?.nome_vaga ?? ' ').localeCompare(b?.nome_vaga || " ")
+            }
+            //a.nome_vaga.localeCompare(b.nome_vaga),
         },
         {
             title: 'Departamento',
@@ -457,8 +465,9 @@ export default function VacanciesPage() {
                 { text: 'Marketing', value: 'Marketing' },
             ],
             onFilter: (value: string, record: Vacancy) =>
-                record.departamento_vaga === value,
+                record.department === value,
         },
+
         {
             title: 'Data de Início',
             dataIndex: 'data_inicial',
@@ -498,11 +507,7 @@ export default function VacanciesPage() {
                 { text: 'Inativa', value: 'inactive' },
             ],
             onFilter: (value: string, record: Vacancy) => {
-                const today = dayjs().format('YYYY-MM-DD');
-                const isActive =
-                    record.data_inicial <= today &&
-                    (!record.data_final || record.data_final >= today);
-
+                const isActive = record.is_ativo;
                 return (
                     (value === 'active' && isActive) ||
                     (value === 'inactive' && !isActive)
@@ -574,14 +579,13 @@ export default function VacanciesPage() {
                 <Sidebar isOpen={isSidebarOpen} />
 
                 <main
-                    className={`pt-16 transition-all duration-300 ${
-                        isSidebarOpen ? 'ml-64' : 'ml-16'
-                    }`}
+                    className={`pt-16 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-16'
+                        }`}
                 >
                     <div className="p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-2xl font-bold text-primary">
-                                Gerenciamento de Vagas : 
+                                Gerenciamento de Vagas :
                             </h1>
                             <Button
                                 type="primary"
@@ -685,7 +689,7 @@ export default function VacanciesPage() {
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Departamento">
-                                    {selectedVacancy.departamento_vaga}
+                                    {selectedVacancy.department}
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Tipo de Seleção">
@@ -750,7 +754,7 @@ export default function VacanciesPage() {
 
                             <div className="mt-6">
                                 <h3 className="text-lg font-semibold mb-2">
-                                    Diferenciais
+                                    Atribuições
                                 </h3>
                                 <div className="bg-gray-50 p-4 rounded border whitespace-pre-line">
                                     {selectedVacancy.diferencial}
@@ -848,6 +852,35 @@ export default function VacanciesPage() {
                                 <Input />
                             </Form.Item>
 
+                            {/*Novas Alterações*/}
+                            <Form.Item
+                                name="salary"
+                                label="Salário"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message:
+                                            'Digite o salário da vaga',
+                                    },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="location"
+                                label="Localização da vaga"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message:
+                                            'Por favor, digite a localização da vaga',
+                                    },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
                             <Form.Item
                                 name="limit_candidatos"
                                 label="Limite de Candidatos"
@@ -934,17 +967,17 @@ export default function VacanciesPage() {
                         </Form.Item>
                         <Form.Item
                             name="diferencial"
-                            label="Diferenciais"
+                            label="Atribuições"
                             rules={[
                                 {
                                     required: true,
                                     message:
-                                        'Por favor, informe os diferenciais',
+                                        'Por favor, informe as atribuições',
                                 },
                             ]}
                         >
                             <Input
-                                placeholder="Digite um diferencial e pressione Enter"
+                                placeholder="Digite uma atribuição e pressione Enter"
                                 value={form.getFieldValue('diferencial')}
                                 onChange={(e) => {
                                     form.setFieldsValue({
