@@ -91,8 +91,8 @@ export default function VacancyCandidatesPage() {
         const imageName = file_perfil.split('/').pop();
         if (!imageName) return null;
 
-        // return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
-        return `http://localhost:8000/candidato/perfil/${imageName}`;
+         return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
+        //return `http://localhost:8000/candidato/perfil/${imageName}`;
     };
 
     const getCvUrl = (file_cv: string) => {
@@ -101,8 +101,8 @@ export default function VacancyCandidatesPage() {
         const fileName = file_cv.split('/').pop();
         if (!fileName) return null;
 
-        //return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
-        return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
+        return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        //return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
     };
 
     const getCvViewUrl = (file_cv: string) => {
@@ -111,8 +111,8 @@ export default function VacancyCandidatesPage() {
         const fileName = file_cv.split('/').pop();
         if (!fileName) return null;
 
-        //return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
-        return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
+        return `https://api.rh.grupotapajos.com.br/candidato/cv/uploads/cv/${fileName}`;
+        //return `http://localhost:8000/candidato/cv/uploads/cv/${fileName}`;
     };
 
     const downloadCv = (candidate: ICandidate) => {

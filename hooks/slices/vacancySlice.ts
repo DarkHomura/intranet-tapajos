@@ -101,8 +101,8 @@ const initialState: VacancyState = {
     },
 };
 
-//const API_URL = 'https://api.rh.grupotapajos.com.br';
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://api.rh.grupotapajos.com.br';
+//const API_URL = 'http://localhost:8000';
 
 export const fetchVacancies = createAsyncThunk(
     'vacancy/fetchVacancies',
