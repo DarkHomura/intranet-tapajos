@@ -1,6 +1,6 @@
 //ALTERAÇÃO
 export type Vacancy = {
-    department: string;
+    departamento_vaga: string;
     diferencial: string;
     imagem_capa: string;
     isInternalSelection: boolean;

@@ -91,7 +91,7 @@ export default function VacancyCandidatesPage() {
         const imageName = file_perfil.split('/').pop();
         if (!imageName) return null;
 
-         return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
+        return `https://api.rh.grupotapajos.com.br/candidato/perfil/${imageName}`;
         //return `http://localhost:8000/candidato/perfil/${imageName}`;
     };
 
@@ -334,7 +334,7 @@ export default function VacancyCandidatesPage() {
                                     </h1>
                                     <p className="text-gray-600">
                                         Departamento:{' '}
-                                        {currentVacancy?.department} |
+                                        {currentVacancy?.departamento_vaga} |
                                         Tipo:{' '}
                                         {currentVacancy?.isInternalSelection
                                             ? 'Seleção Interna'

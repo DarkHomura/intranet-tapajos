@@ -177,10 +177,11 @@ export default function VacanciesPage() {
 
     const showModal = (record?: Vacancy) => {
         if (record) {
+            console.log(record)
             setEditingId(record.id);
             form.setFieldsValue({
                 nome_vaga: record.nome_vaga,
-                departamento_vaga: record.department,
+                departamento_vaga: record.departamento_vaga,
 
                 //Alteração
                 salary: record.salary,
@@ -251,7 +252,7 @@ export default function VacanciesPage() {
                     changedFields.nome_vaga = values.nome_vaga;
                 }
 
-                if (values.departamento_vaga !== currentVacancy.department) {
+                if (values.departamento_vaga !== currentVacancy.departamento_vaga) {
                     changedFields.department = values.departamento_vaga;
                 }
 
@@ -288,6 +289,10 @@ export default function VacanciesPage() {
                         values.isInternalSelection;
                 }
 
+                if (!('isInternalSelection' in changedFields)) {
+                    changedFields.isInternalSelection = currentVacancy.isInternalSelection;
+                }
+
                 if ((values.url_link || null) !== currentVacancy.url_link) {
                     changedFields.url_link = values.url_link || null;
                 }
@@ -314,7 +319,7 @@ export default function VacanciesPage() {
                     changedFields.department !== ''
                 ) {
                     changedFields.department =
-                        currentVacancy.department;
+                        currentVacancy.departamento_vaga;
                 }
 
                 if (
@@ -465,7 +470,7 @@ export default function VacanciesPage() {
                 { text: 'Marketing', value: 'Marketing' },
             ],
             onFilter: (value: string, record: Vacancy) =>
-                record.department === value,
+                record.departamento_vaga === value,
         },
 
         {
@@ -689,7 +694,7 @@ export default function VacanciesPage() {
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Departamento">
-                                    {selectedVacancy.department}
+                                    {selectedVacancy.departamento_vaga}
                                 </Descriptions.Item>
 
                                 <Descriptions.Item label="Tipo de Seleção">
