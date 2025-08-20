@@ -71,6 +71,7 @@ const EmailModal: React.FC<EmailModalProps> = ({
     useEffect(() => {
         if (emailStatus.success) {
             message.success('E-mail enviado com sucesso!');
+            dispatch(resetEmailStatus());
             onClose();
         }
 
