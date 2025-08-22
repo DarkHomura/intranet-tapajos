@@ -121,9 +121,8 @@ export const fetchVacancies = createAsyncThunk(
                     Authorization: `Bearer ${auth.accessToken}`,
                 },
             });
-
-            console.log(response.data)
-            return response.data;
+            const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == true)
+            return filterVacancies;
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 return rejectWithValue(error.response?.data?.message);
@@ -353,6 +352,8 @@ export const deleteVacancy = createAsyncThunk(
             if (!auth.accessToken) {
                 return rejectWithValue('Token de autenticação não encontrado');
             }
+
+            console.log(id)
 
             await axios.delete(`${API_URL}/vagas/${id}`, {
                 headers: {
