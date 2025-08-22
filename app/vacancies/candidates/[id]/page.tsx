@@ -127,7 +127,21 @@ export default function VacancyCandidatesPage() {
             return;
         }
 
-        window.open(cvUrl, '_blank');
+        fetch(cvUrl).then((res) => res.blob()).then((blob:any) => {
+            const blobUrl = window.URL.createObjectURL(new Blob([blob]))
+            const filename: any = cvUrl.split("/").pop()
+            const aTag = document.createElement("a")
+            aTag.href = blobUrl
+            aTag.setAttribute("download", filename)
+            document.body.appendChild(aTag)
+            aTag.click()
+            aTag.remove()
+        })
+        /*
+        */
+
+        //window.open(cvUrl, '_blank');
+
     };
 
     const showImagePreview = (imageUrl: string) => {
@@ -210,7 +224,7 @@ export default function VacancyCandidatesPage() {
                 { text: 'Sim', value: true },
                 { text: 'Não', value: false },
             ],
-            onFilter: (value: boolean, record: ICandidate) =>{
+            onFilter: (value: boolean, record: ICandidate) => {
                 //console.log(record)
                 return record.candidate?.is_primeiraexperiencia === value
             }
@@ -329,7 +343,7 @@ export default function VacancyCandidatesPage() {
                             <>
                                 <div className="mb-6">
                                     <h1 className="text-2xl font-bold text-primary">
-                                        Candidatos para: {currentVacancy?.isInternalSelection? currentVacancy?.nome_vaga + " - Vaga Interna": currentVacancy?.nome_vaga + " - Vaga Externa"}
+                                        Candidatos para: {currentVacancy?.isInternalSelection ? currentVacancy?.nome_vaga + " - Vaga Interna" : currentVacancy?.nome_vaga + " - Vaga Externa"}
 
                                     </h1>
                                     <p className="text-gray-600">

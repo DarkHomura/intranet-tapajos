@@ -134,10 +134,22 @@ export const talentsColumns = [
                     icon={<SearchOutlined />}
                     onClick={() => {
                         if (record.candidate?.file_cv) {
+                            const cvUrl = `https://api.rh.grupotapajos.com.br/candidato/cv/${record.candidate.file_cv}`
+                                    fetch(cvUrl).then((res) => res.blob()).then((blob:any) => {
+                                        const blobUrl = window.URL.createObjectURL(new Blob([blob]))
+                                        const filename: any = cvUrl.split("/").pop()
+                                        const aTag = document.createElement("a")
+                                        aTag.href = blobUrl
+                                        aTag.setAttribute("download", filename)
+                                        document.body.appendChild(aTag)
+                                        aTag.click()
+                                        aTag.remove()
+                                    })
+                                    /*
                             window.open(
-                                `https://api.rh.grupotapajos.com.br//candidato/cv/${record.candidate.file_cv}`,
+                                `https://api.rh.grupotapajos.com.br/candidato/cv/${record.candidate.file_cv}`,
                                 '_blank'
-                            );
+                            );*/
                         } else {
                             message.warning('Currículo não disponível');
                         }
