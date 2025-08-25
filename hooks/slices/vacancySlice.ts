@@ -121,9 +121,38 @@ export const fetchVacancies = createAsyncThunk(
                     Authorization: `Bearer ${auth.accessToken}`,
                 },
             });
-            //const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == true)
-            //return filterVacancies;
-            return response.data
+            const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == true)
+            return filterVacancies;
+            //return response.data
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                return rejectWithValue(error.response?.data?.message);
+            }
+            return rejectWithValue('Erro desconhecido ao buscar vagas');
+        }
+    }
+);
+
+export const fetchVacanciesByStatus = createAsyncThunk(
+    'vacancy/fetchVacanciesByStatus',
+    async (status:boolean, { getState, rejectWithValue }) => {
+        try {
+            const { auth } = getState() as {
+                auth: { accessToken: string | null };
+            };
+
+            if (!auth.accessToken) {
+                return rejectWithValue('Token de autenticação não encontrado');
+            }
+
+            const response = await axios.get(`${API_URL}/vagas`, {
+                headers: {
+                    Authorization: `Bearer ${auth.accessToken}`,
+                },
+            });
+            const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == status)
+            return filterVacancies;
+            //return response.data
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 return rejectWithValue(error.response?.data?.message);
@@ -653,6 +682,10 @@ const vacancySlice = createSlice({
             state.loading = false;
             state.error = action.payload as string;
         });
+
+        builder.addCase(fetchVacanciesByStatus.fulfilled, (state, action) =>{
+            state.vacancies = action.payload;
+        })
 
         builder.addCase(fetchVacancyById.pending, (state) => {
             state.loading = true;

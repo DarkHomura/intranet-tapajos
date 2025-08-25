@@ -32,6 +32,7 @@ import {
     fetchDepartments,
     fetchAllTalents,
     setVacancyName,
+    fetchVacanciesByStatus,
 } from '@/hooks/slices/vacancySlice';
 import dayjs from 'dayjs';
 import { Vacancy, CreateVacancyPayload } from '@/types/vacancy/IVacancy';
@@ -93,6 +94,7 @@ export default function VacanciesPage() {
     const [pageSize, setPageSize] = useState(10);
     const [searchText, setSearchText] = useState('');
     const [filteredTalents, setFilteredTalents] = useState<TalentData[]>([]);
+    const [statusVacancies, setStatusVacancies] = useState(false)
 
     useEffect(() => {
         dispatch(fetchVacancies());
@@ -448,6 +450,10 @@ export default function VacanciesPage() {
         setSearchText(e.target.value);
     };
 
+    const handleGetDisableVacancies = () =>{
+        dispatch(fetchVacanciesByStatus(statusVacancies))
+        setStatusVacancies(!statusVacancies)
+    }
     const columns = [
         {
             title: 'Vaga',
@@ -506,7 +512,7 @@ export default function VacanciesPage() {
                         {isActive ? 'Ativa' : 'Inativa'}
                     </Tag>
                 );
-            },
+            }, /*
             filters: [
                 { text: 'Ativa', value: 'active' },
                 { text: 'Inativa', value: 'inactive' },
@@ -517,7 +523,7 @@ export default function VacanciesPage() {
                     (value === 'active' && isActive) ||
                     (value === 'inactive' && !isActive)
                 );
-            },
+            },*/
         },
         {
             title: 'Tipo',
@@ -600,6 +606,8 @@ export default function VacanciesPage() {
                                 +
                             </Button>
                         </div>
+
+                        <Button className='p-5 mb-3' onClick={handleGetDisableVacancies}>Exibir Vagas {statusVacancies ? "ativas" : "inativas"}</Button>
 
                         <Tabs defaultActiveKey="vacancies">
                             <TabPane tab="Vagas" key="vacancies">
