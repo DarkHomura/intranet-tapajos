@@ -121,8 +121,9 @@ export const fetchVacancies = createAsyncThunk(
                     Authorization: `Bearer ${auth.accessToken}`,
                 },
             });
-            const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == true)
-            return filterVacancies;
+            //const filterVacancies = response.data.filter((item:Vacancy) => item.is_ativo == true)
+            //return filterVacancies;
+            return response.data
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 return rejectWithValue(error.response?.data?.message);
