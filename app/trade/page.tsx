@@ -22,6 +22,9 @@ import { Operador } from '@/types/Trade/IOperator';
 import { Escala, IEscala } from '@/types/Trade/IEscala';
 import { ICampaign } from '@/types/Trade/ICampaign';
 import { IProduct } from '@/types/Trade/IProduct';
+import { IParticipants } from '@/types/Trade/IParticipants';
+import { Label } from '@radix-ui/react-label';
+import * as XLSX from 'xlsx'
 
 const { Option } = Select;
 
@@ -48,21 +51,52 @@ export default function CampaignRegistration() {
     const [meta_valor, setMetaValor] = useState('');
     const user = useSelector((state: RootState) => state.auth.user);
     const [escalaData, setEscalaData] = useState<Escala[]>([]);
+    const [isEditing, setIsEditing] = useState(false);
+    /*const [editingParticipant, setEditingParticipant] =
+            useState<IParticipants | null>(null);*/
+    const [jsonExcelRCA, setJsonExcelRCA] = useState([])
+
+    const [filename, setFileName] = useState()
 
     useEffect(() => {
         dispatch(fetchFiliais());
     }, [productName]);
+
+    useEffect(() => {
+        if (tipoOperador == 'teleoperador') {
+            dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
+            console.log(1)
+        } else {
+            console.log(2)
+            console.log(tipoOperador)
+            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap()
+            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' }))
+            console.log(operators)
+            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap().then(() => {
+                jsonExcelRCA.forEach((item: any) => {
+                    console.log("Entrou")
+                    handleExcelRCA(item);
+                });
+            })
+        }
+    }, [dispatch, jsonExcelRCA, setJsonExcelRCA])
+
+    useEffect(() => {
+        dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }));
+        //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }));
+        console.log(products)
+    }, [marcaProdutos, dispatch, tipoMarcaProduto])
 
     const handleAddOperador = () => {
         if (selectedOperador && meta_valor && premiacao) {
             const idparticipante =
                 tipoOperador === 'teleoperador'
                     ? operators?.find(
-                          (op: Operador) => op.nome === selectedOperador
-                      )?.matricula
+                        (op: Operador) => op.nome === selectedOperador
+                    )?.matricula
                     : operators?.find(
-                          (op: Operador) => op.nome === selectedOperador
-                      )?.codusur;
+                        (op: Operador) => op.nome === selectedOperador
+                    )?.codusur;
 
             if (!idparticipante) {
                 message.error('Operador não encontrado!');
@@ -220,6 +254,229 @@ export default function CampaignRegistration() {
         dispatch(fetchFiliais());
     };
 
+    const handleEditParticipant = (record: any) => {
+        console.log(record)
+
+        setIsEditing(true);
+        //setEditingParticipant(participant);
+        setSelectedOperador(record.nome);
+        setTipoOperador(
+            record.modelo === 'teleoperador' ? 'teleoperador' : 'vendedor'
+        );
+        setTipoMeta(record.tipo_meta || 'VALOR');
+        setMetaValor(
+            record.tipo_meta === 'VALOR'
+                ? record.meta_valor
+                : record.meta_quantidade
+        );
+        setPremiacao(record.premiacao);
+
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        //setEditingParticipant(null);
+        setSelectedOperador('');
+        setMetaValor('');
+        setPremiacao('');
+    };
+
+    const handleGetExcelFile = async (e: any) => {
+        const file = e.target.files[0]
+        setFileName(file.name)
+
+        const data = await file.arrayBuffer()
+        const workBook = XLSX.readFile(data)
+        //vendedor
+        const workSheetRCA = workBook.Sheets[workBook.SheetNames[0]]
+        const jsonVendedor: any = XLSX.utils.sheet_to_json(workSheetRCA)
+        //Emitente/Teleoperador
+        const workSheetEmitante = workBook.Sheets[workBook.SheetNames[1]]
+        const jsonTeleoperador: any = XLSX.utils.sheet_to_json(workSheetEmitante)
+        //Marca
+        const workSheetMarca = workBook.Sheets[workBook.SheetNames[2]]
+        const jsonMarca: any = XLSX.utils.sheet_to_json(workSheetMarca)
+        //Produto
+        const workSheetProduto = workBook.Sheets[workBook.SheetNames[3]]
+        const jsonProduto: any = XLSX.utils.sheet_to_json(workSheetProduto)
+
+        setJsonExcelRCA(jsonVendedor)
+
+        console.log(jsonVendedor)
+        console.log(jsonTeleoperador)
+        console.log(jsonMarca)
+        console.log(jsonProduto)
+
+        //setJsonOperador(jsonTeleoperador)
+        handleExcelProdutos(jsonProduto ?? [])
+        //handleExcelRCA(jsonVendedor ?? [])
+        //console.log(workBook)
+        jsonTeleoperador.forEach((item: any) => {
+            handleExcelOperador(item)
+            setTipoOperador('vendedor')
+        })
+
+        setTipoOperador('vendedor')
+        /*
+        jsonVendedor.forEach((item: any) => {
+            handleExcelRCA(item);
+        });
+        */
+
+    }
+
+    const handleExcelOperador = (item: any) => {
+        setTipoOperador('teleoperador')
+        setSelectedOperador(item.IDCOLABORADOR)
+        setMetaValor(item.META)
+        setPremiacao(item.PREMIACAO)
+        console.log(tipoOperador)
+        console.log(operators)
+
+        if (item) {
+
+            const idparticipante =
+                tipoOperador === 'teleoperador'
+                    ? operators?.find(
+                        (op: Operador) => op.matricula === item.IDCOLABORADOR
+                    )?.matricula
+                    : operators?.find(
+                        (op: Operador) => op.matricula === item.IDCOLABORADOR
+                    )?.codusur;
+
+            const nomeOperador = operators?.find((op: Operador) => op.matricula === item.IDCOLABORADOR)?.nome
+
+            if (!idparticipante) {
+                message.error('Operador não encontrado!');
+                return;
+            }
+
+            const participante = {
+                modelo:
+                    tipoOperador === 'teleoperador' ? 'teleoperador' : 'RCA',
+                meta: tipoMeta,
+                idparticipante,
+                meta_valor: tipoMeta === 'VALOR' ? parseFloat(String(item.META).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0,
+                meta_quantidade: tipoMeta === 'QUANTIDADE' ? parseFloat(String(item.META).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0,
+                premiacao: String(item.PREMIACAO).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.'),
+                tipo_meta: tipoMeta,
+            };
+
+            console.log(participante)
+
+            setOperadores((prev) => [
+                ...prev,
+                {
+                    ...participante,
+                    nome: nomeOperador ?? '',
+                    tipo: tipoOperador,
+                    matricula: idparticipante,
+                    codusur: idparticipante,
+                },
+            ]);
+
+            console.log(operadores)
+
+            setSelectedOperador('');
+            setMetaValor('');
+            setPremiacao('');
+        } else {
+            message.error('Preencha todos os campos antes de adicionar!');
+        }
+    }
+
+    const handleExcelRCA = (item: any) => {
+
+        dispatch(fetchOperators({ busca: ' ', type: 'vendedor' }))
+
+        setTipoOperador('vendedor')
+        setSelectedOperador(item.IDCOLABORADOR)
+        setMetaValor(item.META)
+        setPremiacao(item.PREMIACAO)
+        console.log(tipoOperador)
+        console.log(operators)
+
+        if (item) {
+
+            const idparticipante =
+                tipoOperador === 'teleoperador'
+                    ? operators?.find(
+                        (op: Operador) => op.codusur === item.IDCOLABORADOR
+                    )?.matricula
+                    : operators?.find(
+                        (op: Operador) => op.codusur === item.IDCOLABORADOR
+                    )?.codusur;
+
+            const nomeOperador = operators?.find((op: Operador) => op.codusur === item.IDCOLABORADOR)?.nome
+
+            if (!idparticipante) {
+                message.error('Operador não encontrado!');
+                return;
+            }
+
+            const participante = {
+                modelo:
+                    tipoOperador === 'teleoperador' ? 'teleoperador' : 'RCA',
+                meta: tipoMeta,
+                idparticipante,
+                meta_valor: tipoMeta === 'VALOR' ? parseFloat(String(item.META).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0,
+                meta_quantidade: tipoMeta === 'QUANTIDADE' ? parseFloat(String(item.META).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0,
+                premiacao: String(item.PREMIACAO).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.'),
+                tipo_meta: tipoMeta,
+            };
+
+            console.log(participante)
+
+            setOperadores((prev) => [
+                ...prev,
+                {
+                    ...participante,
+                    nome: nomeOperador ?? '',
+                    tipo: tipoOperador,
+                    matricula: idparticipante,
+                    codusur: idparticipante,
+                },
+            ]);
+
+            console.log(operadores)
+
+            setSelectedOperador('');
+            setMetaValor('');
+            setPremiacao('');
+        } else {
+            message.error('Preencha todos os campos antes de adicionar!');
+        }
+    }
+
+    const handleExcelProdutos = (jsonProdutos: any[]) => {
+        const novosProdutos: { nome: string; codprod: string; descricao: string }[] = [];
+
+        jsonProdutos.forEach((item: any) => {
+            console.log(item.IDPRODUTO, item.PRODUTO);
+
+            const produto = products?.find(
+                (p: any) => String(p.codprod) === String(item.IDPRODUTO)
+            );
+
+            if (!produto) {
+                message.error(`Produto ${item.IDPRODUTO} não encontrado!`);
+                return;
+            }
+
+            novosProdutos.push({
+                nome: item.PRODUTO ?? '',
+                codprod: String(produto.codprod),
+                descricao: produto.descricao,
+            });
+        });
+
+        setMarcaProdutos((prev) => [...prev, ...novosProdutos]);
+    };
+
+    const handleExcelMarca = () => {
+
+    }
+
     return (
         <div className="min-h-screen bg-background">
             <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
@@ -264,6 +521,11 @@ export default function CampaignRegistration() {
                                     </Option>
                                 ))}
                             </Select>
+                        </div>
+
+                        <div className='flex justify-start flex-col items-start'>
+                            <Label className='text-sm text-gray-500 ms-3'>Importar Arquivo excel para preenchimento dos dados</Label>
+                            <Input className='m-2' type='file' onChange={(e) => handleGetExcelFile(e)} />
                         </div>
 
                         <div className="bg-white p-4 rounded shadow">
@@ -335,7 +597,7 @@ export default function CampaignRegistration() {
                                                 tipoOperador === 'teleoperador'
                                                     ? operator.matricula
                                                     : operator.codusur,
-                                            label: operator.nome,
+                                            label: tipoOperador == 'teleoperador' ? operator.matricula + " - " + operator.nome : operator.codusur + " - " + operator.nome,
                                             nome: operator.nome,
                                         })
                                     )}
@@ -375,9 +637,18 @@ export default function CampaignRegistration() {
                                     className="bg-green-500 hover:bg-green-600"
                                     onClick={handleAddOperador}
                                 >
-                                    Adicionar
+                                    {isEditing ? 'Atualizar' : 'Adicionar'}
                                 </Button>
+                                {isEditing && (
+                                    <Button
+                                        className="bg-gray-400 hover:bg-gray-500"
+                                        onClick={handleCancelEdit}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                )}
                             </div>
+
                             <Table
                                 dataSource={operadores}
                                 columns={[
@@ -416,15 +687,40 @@ export default function CampaignRegistration() {
                                     {
                                         title: 'Ação',
                                         key: 'acao',
-                                        render: (_, __, index) => (
-                                            <Button
-                                                className="bg-red-500 hover:bg-red-600"
-                                                onClick={() =>
-                                                    handleRemoveOperador(index)
-                                                }
-                                            >
-                                                Remover
-                                            </Button>
+                                        render: (_, record, index) => (
+                                            <div className="flex space-x-2">
+                                                <Button
+                                                    className="bg-blue-500 hover:bg-blue-600 p-1"
+                                                    onClick={() =>
+                                                        handleEditParticipant(
+                                                            record
+                                                        )
+                                                    }
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        strokeWidth={1.5}
+                                                        stroke="currentColor"
+                                                        className="w-4 h-4"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                                                        />
+                                                    </svg>
+                                                </Button>
+                                                <Button
+                                                    className="bg-red-500 hover:bg-red-600"
+                                                    onClick={() =>
+                                                        handleRemoveOperador(index)
+                                                    }
+                                                >
+                                                    Remover
+                                                </Button>
+                                            </div>
                                         ),
                                     },
                                 ]}
@@ -482,8 +778,8 @@ export default function CampaignRegistration() {
                                                     : product.codmarca,
                                             label:
                                                 tipoMarcaProduto === 'produto'
-                                                    ? product.descricao
-                                                    : product.marca,
+                                                    ? product.descricao + " - " + product.codprod
+                                                    : product.marca + " - " + product.codmarca,
                                         })
                                     )}
                                 />

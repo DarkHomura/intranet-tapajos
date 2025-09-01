@@ -11,4 +11,5 @@ export type Operador = {
     tipo_meta: string;
     label?: string;
     value?: string;
+    id?:number
 };
