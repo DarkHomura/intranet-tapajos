@@ -83,16 +83,16 @@ export default function CampaignRegistration() {
     useEffect(() => {
         console.log(tipoMarcaProduto)
         if (tipoMarcaProduto == 'marca') {
+            if (control2 == false)
             dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
         } else {
-            if (control2 == false) {
+            if (control2 == false) 
                 dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
                 /*.unwrap().then(() => {
                     jsonExcelProduto.forEach((item: any) => {
                         handleExcelProdutos(item)
                     })
                 })*/
-            }
         }
         console.log(products)
     }, [jsonExcelMarca, tipoMarcaProduto, control])
@@ -324,10 +324,12 @@ export default function CampaignRegistration() {
                 handleExcelMarca(item)
                 //setTipoMarcaProduto('produto')
             })
+            setControl2(true)
         }else{
             jsonProduto.forEach((item:any) =>{
                 handleExcelProdutos(item)
             })
+            setControl2(true)
         }
 
         if (tipoOperador == 'teleoperador') {
