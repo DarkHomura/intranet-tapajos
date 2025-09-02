@@ -303,16 +303,16 @@ export default function CampaignRegistration() {
         const data = await file.arrayBuffer()
         const workBook = XLSX.readFile(data)
         //vendedor
-        const workSheetRCA = workBook.Sheets[workBook.SheetNames[0]]
+        const workSheetRCA = workBook.Sheets['RCA']
         const jsonVendedor: any = XLSX.utils.sheet_to_json(workSheetRCA)
         //Emitente/Teleoperador
-        const workSheetEmitante = workBook.Sheets[workBook.SheetNames[1]]
+        const workSheetEmitante = workBook.Sheets['EMITENTE']
         const jsonTeleoperador: any = XLSX.utils.sheet_to_json(workSheetEmitante)
         //Marca
-        const workSheetMarca = workBook.Sheets[workBook.SheetNames[2]]
+        const workSheetMarca = workBook.Sheets['MARCA']
         const jsonMarca: any = XLSX.utils.sheet_to_json(workSheetMarca)
         //Produto
-        const workSheetProduto = workBook.Sheets[workBook.SheetNames[3]]
+        const workSheetProduto = workBook.Sheets['PRODUTO']
         const jsonProduto: any = XLSX.utils.sheet_to_json(workSheetProduto)
 
         setJsonExcelRCA(jsonVendedor)
@@ -801,8 +801,8 @@ export default function CampaignRegistration() {
                                                     : product.codmarca,
                                             label:
                                                 tipoMarcaProduto === 'produto'
-                                                    ? product.descricao + " - " + product.codprod
-                                                    : product.marca + " - " + product.codmarca,
+                                                    ? product.codprod + " - " + product.descricao
+                                                    : product.codmarca + " - " + product.marca,
                                         })
                                     )}
                                 />
