@@ -55,8 +55,12 @@ export default function CampaignRegistration() {
     /*const [editingParticipant, setEditingParticipant] =
             useState<IParticipants | null>(null);*/
     const [jsonExcelRCA, setJsonExcelRCA] = useState([])
+    const [jsonExcelMarca, setJsonExcelMarca] = useState([])
+    const [jsonExcelProduto, setJsonExcelProduto] = useState([])
 
     const [filename, setFileName] = useState()
+    const [control, setControl] = useState(false)
+    const [control2, setControl2] = useState(false)
 
     useEffect(() => {
         dispatch(fetchFiliais());
@@ -65,27 +69,37 @@ export default function CampaignRegistration() {
     useEffect(() => {
         if (tipoOperador == 'teleoperador') {
             dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
-            console.log(1)
         } else {
-            console.log(2)
-            console.log(tipoOperador)
-            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap()
-            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' }))
-            console.log(operators)
-            dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap().then(() => {
-                jsonExcelRCA.forEach((item: any) => {
-                    console.log("Entrou")
-                    handleExcelRCA(item);
-                });
-            })
+            if (control == false) {
+                dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap().then(() => {
+                    jsonExcelRCA.forEach((item: any) => {
+                        handleExcelRCA(item);
+                    });
+                })
+            }
         }
-    }, [dispatch, jsonExcelRCA, setJsonExcelRCA])
+    }, [jsonExcelRCA, tipoOperador])
 
     useEffect(() => {
-        dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }));
-        //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }));
+        console.log(tipoMarcaProduto)
+        if (tipoMarcaProduto == 'marca') {
+            dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
+        } else {
+            if (control2 == false) {
+                dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
+                /*.unwrap().then(() => {
+                    jsonExcelProduto.forEach((item: any) => {
+                        handleExcelProdutos(item)
+                    })
+                })*/
+            }
+        }
         console.log(products)
-    }, [marcaProdutos, dispatch, tipoMarcaProduto])
+    }, [jsonExcelMarca, tipoMarcaProduto, control])
+
+    useEffect(() => {
+
+    }, [control2])
 
     const handleAddOperador = () => {
         if (selectedOperador && meta_valor && premiacao) {
@@ -139,6 +153,7 @@ export default function CampaignRegistration() {
         codprod: string,
         descricao: string
     ) => {
+        console.log(nome)
         if (nome) {
             setMarcaProdutos([...marcaProdutos, { nome, codprod, descricao }]);
             setProductName(nome || '');
@@ -301,40 +316,36 @@ export default function CampaignRegistration() {
         const jsonProduto: any = XLSX.utils.sheet_to_json(workSheetProduto)
 
         setJsonExcelRCA(jsonVendedor)
+        setJsonExcelMarca(jsonMarca)
+        setJsonExcelProduto(jsonProduto)
 
-        console.log(jsonVendedor)
-        console.log(jsonTeleoperador)
-        console.log(jsonMarca)
-        console.log(jsonProduto)
+        if (tipoMarcaProduto == 'marca') {
+            jsonMarca.forEach((item: any) => {
+                handleExcelMarca(item)
+                //setTipoMarcaProduto('produto')
+            })
+        }else{
+            jsonProduto.forEach((item:any) =>{
+                handleExcelProdutos(item)
+            })
+        }
 
-        //setJsonOperador(jsonTeleoperador)
-        handleExcelProdutos(jsonProduto ?? [])
-        //handleExcelRCA(jsonVendedor ?? [])
-        //console.log(workBook)
-        jsonTeleoperador.forEach((item: any) => {
-            handleExcelOperador(item)
-            setTipoOperador('vendedor')
-        })
+        if (tipoOperador == 'teleoperador') {
+            jsonTeleoperador.forEach((item: any) => {
+                handleExcelOperador(item)
+                //setTipoOperador('vendedor')
+            })
+        }
 
-        setTipoOperador('vendedor')
-        /*
-        jsonVendedor.forEach((item: any) => {
-            handleExcelRCA(item);
-        });
-        */
-
+        //setTipoOperador('vendedor')
     }
 
     const handleExcelOperador = (item: any) => {
-        setTipoOperador('teleoperador')
+        //setTipoOperador('teleoperador')
         setSelectedOperador(item.IDCOLABORADOR)
         setMetaValor(item.META)
         setPremiacao(item.PREMIACAO)
-        console.log(tipoOperador)
-        console.log(operators)
-
         if (item) {
-
             const idparticipante =
                 tipoOperador === 'teleoperador'
                     ? operators?.find(
@@ -362,8 +373,6 @@ export default function CampaignRegistration() {
                 tipo_meta: tipoMeta,
             };
 
-            console.log(participante)
-
             setOperadores((prev) => [
                 ...prev,
                 {
@@ -374,8 +383,6 @@ export default function CampaignRegistration() {
                     codusur: idparticipante,
                 },
             ]);
-
-            console.log(operadores)
 
             setSelectedOperador('');
             setMetaValor('');
@@ -388,13 +395,11 @@ export default function CampaignRegistration() {
     const handleExcelRCA = (item: any) => {
 
         dispatch(fetchOperators({ busca: ' ', type: 'vendedor' }))
-
-        setTipoOperador('vendedor')
+        //setTipoOperador('vendedor')
+        setControl(false)
         setSelectedOperador(item.IDCOLABORADOR)
         setMetaValor(item.META)
         setPremiacao(item.PREMIACAO)
-        console.log(tipoOperador)
-        console.log(operators)
 
         if (item) {
 
@@ -425,8 +430,6 @@ export default function CampaignRegistration() {
                 tipo_meta: tipoMeta,
             };
 
-            console.log(participante)
-
             setOperadores((prev) => [
                 ...prev,
                 {
@@ -438,42 +441,58 @@ export default function CampaignRegistration() {
                 },
             ]);
 
-            console.log(operadores)
-
             setSelectedOperador('');
             setMetaValor('');
             setPremiacao('');
+            setControl(true)
         } else {
             message.error('Preencha todos os campos antes de adicionar!');
         }
     }
 
-    const handleExcelProdutos = (jsonProdutos: any[]) => {
+    const handleExcelProdutos = (item: any) => {
+        //setTipoMarcaProduto('produto')
+        setControl2(false)
         const novosProdutos: { nome: string; codprod: string; descricao: string }[] = [];
 
-        jsonProdutos.forEach((item: any) => {
-            console.log(item.IDPRODUTO, item.PRODUTO);
+        const produto = products?.find(
+            (p: any) => String(p.codprod) === String(item.IDPRODUTO)
+        );
 
-            const produto = products?.find(
-                (p: any) => String(p.codprod) === String(item.IDPRODUTO)
-            );
+        if (!produto) {
+            message.error(`Produto ${item.IDPRODUTO} não encontrado!`);
+            return;
+        }
 
-            if (!produto) {
-                message.error(`Produto ${item.IDPRODUTO} não encontrado!`);
-                return;
-            }
-
-            novosProdutos.push({
-                nome: item.PRODUTO ?? '',
-                codprod: String(produto.codprod),
-                descricao: produto.descricao,
-            });
+        novosProdutos.push({
+            nome: produto.descricao ?? '',
+            codprod: String(produto.codprod),
+            descricao: produto.descricao,
         });
 
         setMarcaProdutos((prev) => [...prev, ...novosProdutos]);
     };
 
-    const handleExcelMarca = () => {
+    const handleExcelMarca = (item: any) => {
+        //setTipoMarcaProduto('marca')
+        const produto = products?.find(
+            (p: any) => String(p.codmarca) === String(item.IDMARCA)
+        );
+
+        if (!produto) {
+            message.error(`Produto ${item.IDMARCA} não encontrado!`);
+            return;
+        }
+
+        console.log(produto);
+
+        const marca = {
+            nome: produto.marca ?? ' ',
+            codprod: String(produto.codmarca),
+            descricao: produto.marca,
+        };
+        setMarcaProdutos((prev) => [...prev, marca]);
+        setControl2(false)
 
     }
 
@@ -689,7 +708,8 @@ export default function CampaignRegistration() {
                                         key: 'acao',
                                         render: (_, record, index) => (
                                             <div className="flex space-x-2">
-                                                <Button
+                                                
+                                                {/*<Button
                                                     className="bg-blue-500 hover:bg-blue-600 p-1"
                                                     onClick={() =>
                                                         handleEditParticipant(
@@ -711,7 +731,8 @@ export default function CampaignRegistration() {
                                                             d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
                                                         />
                                                     </svg>
-                                                </Button>
+                                                </Button>*/}
+                                                
                                                 <Button
                                                     className="bg-red-500 hover:bg-red-600"
                                                     onClick={() =>
