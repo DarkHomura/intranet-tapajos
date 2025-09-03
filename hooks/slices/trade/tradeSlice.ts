@@ -356,6 +356,31 @@ export const fetchOperators = createAsyncThunk(
     }
 );
 
+//Alteração
+
+export const fetchVendors = createAsyncThunk(
+    'trade/fetchVendors',
+    async (
+        { busca, type }: { busca: string; type: 'operador' | 'vendedor' },
+        { rejectWithValue }
+    ) => {
+        try {
+            const endpoint =
+                type === 'operador' ? '/busca_operadores' : '/busca_vendedores';
+
+            const response = await apiInstance.post(endpoint, { busca });
+            const data =
+                typeof response.data === 'string'
+                    ? JSON.parse(response.data)
+                    : response.data;
+            return data;
+        } catch (error) {
+            console.error(`Error fetching ${type}s:`, error);
+            return rejectWithValue(error);
+        }
+    }
+);
+
 export const fetchFiliais = createAsyncThunk('trade/fetchFiliais', async () => {
     try {
         const response = await apiInstance.get(`/filiais`);
@@ -394,7 +419,31 @@ export const fetchProductsByType = createAsyncThunk(
         { busca, type }: { busca: string; type: 'produto' | 'marca' },
         { rejectWithValue }
     ) => {
+        console.log('produtos req here')
         try {
+            const endpoint =
+                type === 'produto' ? '/busca_produtos' : '/busca_marcas';
+            const response = await apiInstance.post(endpoint, { busca });
+            const data = JSON.parse(response.data);
+            console.log(data)
+            return data;
+        } catch (error) {
+            console.error(`Error fetching ${type}s:`, error);
+            return rejectWithValue(error);
+        }
+    }
+);
+
+//Alteração
+
+export const fetchMarcasByType = createAsyncThunk(
+    'trade/fetchMarcasByType',
+    async (
+        { busca, type }: { busca: string; type: 'produto' | 'marca' },
+        { rejectWithValue }
+    ) => {
+        try {
+            console.log('marcas req here')
             const endpoint =
                 type === 'produto' ? '/busca_produtos' : '/busca_marcas';
             const response = await apiInstance.post(endpoint, { busca });
@@ -639,6 +688,9 @@ const initialState: ICampaign = {
     currentCampaign: {} as ICampaign,
     filiais: [] as IFilial[],
     escala: [] as IEscala[],
+
+    marcas: [],
+    vendors: []
 };
 
 const tradeSlice = createSlice({
@@ -722,6 +774,18 @@ const tradeSlice = createSlice({
             .addCase(fetchOperators.rejected, (state: ICampaign) => {
                 state.status = 'failed';
             })
+
+            .addCase(fetchVendors.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchVendors.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.vendors = action.payload;
+            })
+            .addCase(fetchVendors.rejected, (state: ICampaign) => {
+                state.status = 'failed';
+            })
+
             .addCase(fetchFiliais.fulfilled, (state, action) => {
                 state.filiais = action.payload;
             })
@@ -749,6 +813,12 @@ const tradeSlice = createSlice({
                 state.status = 'succeeded';
                 state.products = action.payload;
             })
+            //Alteração
+            .addCase(fetchMarcasByType.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.marcas = action.payload;
+            })
+
             .addCase(searchCampaigns.pending, (state) => {
                 state.status = 'loading';
             })

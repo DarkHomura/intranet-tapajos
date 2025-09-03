@@ -11,6 +11,8 @@ import {
     fetchFiliais,
     fetchOperators,
     fetchProductsByType,
+    fetchMarcasByType,
+    fetchVendors,
 } from '@/hooks/slices/trade/tradeSlice';
 import { AppDispatch, RootState } from '@/hooks/store';
 import { debounce } from 'lodash';
@@ -31,7 +33,7 @@ const { Option } = Select;
 export default function CampaignRegistration() {
     const dispatch = useDispatch<AppDispatch>();
 
-    const { currentCampaign, operators, filiais, products } = useSelector(
+    const { currentCampaign, operators, filiais, products, marcas, vendors} = useSelector(
         (state: RootState) => state.trade
     );
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,6 +64,7 @@ export default function CampaignRegistration() {
     const [control, setControl] = useState(false)
     const [control2, setControl2] = useState(false)
 
+
     useEffect(() => {
         dispatch(fetchFiliais());
     }, [productName]);
@@ -71,35 +74,31 @@ export default function CampaignRegistration() {
             dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
         } else {
             if (control == false) {
-                dispatch(fetchOperators({ busca: ' ', type: 'vendedor' })).unwrap().then(() => {
+                dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))/*.unwrap().then(() => {
                     jsonExcelRCA.forEach((item: any) => {
                         handleExcelRCA(item);
                     });
-                })
+                })*/
             }
         }
     }, [jsonExcelRCA, tipoOperador])
 
     useEffect(() => {
-        console.log(tipoMarcaProduto)
         if (tipoMarcaProduto == 'marca') {
             if (control2 == false)
-            dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
+                dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
+                //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
         } else {
-            if (control2 == false) 
+            if (control2 == false)
                 dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
-                /*.unwrap().then(() => {
-                    jsonExcelProduto.forEach((item: any) => {
-                        handleExcelProdutos(item)
-                    })
-                })*/
         }
         console.log(products)
-    }, [jsonExcelMarca, tipoMarcaProduto, control])
+    }, [jsonExcelMarca, tipoMarcaProduto])
 
     useEffect(() => {
-
-    }, [control2])
+        dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
+        dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
+    }, [])
 
     const handleAddOperador = () => {
         if (selectedOperador && meta_valor && premiacao) {
@@ -183,7 +182,12 @@ export default function CampaignRegistration() {
         if (searchTerm) {
             const type =
                 tipoOperador === 'teleoperador' ? 'operador' : 'vendedor';
-            dispatch(fetchOperators({ busca: searchTerm, type }));
+
+                if(type == 'operador')
+                    dispatch(fetchOperators({ busca: searchTerm, type }));
+                else
+                    dispatch(fetchVendors({ busca: searchTerm, type }));
+
         } else {
             message.error('Digite o nome para buscar!');
         }
@@ -193,7 +197,11 @@ export default function CampaignRegistration() {
             if (searchTerm) {
                 const type =
                     tipoMarcaProduto === 'produto' ? 'produto' : 'marca';
-                dispatch(fetchProductsByType({ busca: searchTerm, type }));
+                if(type == 'produto')
+                    dispatch(fetchProductsByType({ busca: searchTerm, type }));
+                else
+                    dispatch(fetchMarcasByType({ busca: searchTerm, type }));
+
             } else {
                 message.error('Digite o nome para buscar!');
             }
@@ -325,8 +333,8 @@ export default function CampaignRegistration() {
                 //setTipoMarcaProduto('produto')
             })
             setControl2(true)
-        }else{
-            jsonProduto.forEach((item:any) =>{
+        } else {
+            jsonProduto.forEach((item: any) => {
                 handleExcelProdutos(item)
             })
             setControl2(true)
@@ -336,6 +344,10 @@ export default function CampaignRegistration() {
             jsonTeleoperador.forEach((item: any) => {
                 handleExcelOperador(item)
                 //setTipoOperador('vendedor')
+            })
+        }else{
+            jsonVendedor.forEach((item:any) =>{
+                handleExcelRCA(item)
             })
         }
 
@@ -347,6 +359,11 @@ export default function CampaignRegistration() {
         setSelectedOperador(item.IDCOLABORADOR)
         setMetaValor(item.META)
         setPremiacao(item.PREMIACAO)
+        if(tipoOperador == 'teleoperador'){
+            console.log(operators)
+        }else{
+            console.log(vendors)
+        }
         if (item) {
             const idparticipante =
                 tipoOperador === 'teleoperador'
@@ -407,14 +424,14 @@ export default function CampaignRegistration() {
 
             const idparticipante =
                 tipoOperador === 'teleoperador'
-                    ? operators?.find(
+                    ? vendors?.find(
                         (op: Operador) => op.codusur === item.IDCOLABORADOR
                     )?.matricula
-                    : operators?.find(
+                    : vendors?.find(
                         (op: Operador) => op.codusur === item.IDCOLABORADOR
                     )?.codusur;
 
-            const nomeOperador = operators?.find((op: Operador) => op.codusur === item.IDCOLABORADOR)?.nome
+            const nomeOperador = vendors?.find((op: Operador) => op.codusur === item.IDCOLABORADOR)?.nome
 
             if (!idparticipante) {
                 message.error('Operador não encontrado!');
@@ -431,6 +448,8 @@ export default function CampaignRegistration() {
                 premiacao: String(item.PREMIACAO).replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.'),
                 tipo_meta: tipoMeta,
             };
+
+            console.log(participante)
 
             setOperadores((prev) => [
                 ...prev,
@@ -455,6 +474,7 @@ export default function CampaignRegistration() {
     const handleExcelProdutos = (item: any) => {
         //setTipoMarcaProduto('produto')
         setControl2(false)
+                        
         const novosProdutos: { nome: string; codprod: string; descricao: string }[] = [];
 
         const produto = products?.find(
@@ -477,7 +497,7 @@ export default function CampaignRegistration() {
 
     const handleExcelMarca = (item: any) => {
         //setTipoMarcaProduto('marca')
-        const produto = products?.find(
+        const produto = marcas?.find(
             (p: any) => String(p.codmarca) === String(item.IDMARCA)
         );
 
@@ -503,6 +523,7 @@ export default function CampaignRegistration() {
             <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Sidebar isOpen={isSidebarOpen} />
 
+            {}
             <main
                 className={`pt-16 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}
             >
@@ -612,7 +633,7 @@ export default function CampaignRegistration() {
                                     onSelect={(_, option) => {
                                         setSelectedOperador(option.nome);
                                     }}
-                                    options={(operators || []).map(
+                                    options={(( tipoOperador == 'teleoperador'? operators: vendors) || []).map(
                                         (operator: Operador) => ({
                                             value:
                                                 tipoOperador === 'teleoperador'
@@ -710,7 +731,7 @@ export default function CampaignRegistration() {
                                         key: 'acao',
                                         render: (_, record, index) => (
                                             <div className="flex space-x-2">
-                                                
+
                                                 {/*<Button
                                                     className="bg-blue-500 hover:bg-blue-600 p-1"
                                                     onClick={() =>
@@ -734,7 +755,7 @@ export default function CampaignRegistration() {
                                                         />
                                                     </svg>
                                                 </Button>*/}
-                                                
+
                                                 <Button
                                                     className="bg-red-500 hover:bg-red-600"
                                                     onClick={() =>
@@ -793,7 +814,7 @@ export default function CampaignRegistration() {
                                             option.label as string
                                         );
                                     }}
-                                    options={(products || []).map(
+                                    options={( (tipoMarcaProduto == 'marca' ? marcas :  products) || []).map(
                                         (product: IProduct) => ({
                                             value:
                                                 tipoMarcaProduto === 'produto'

@@ -26,6 +26,9 @@ export interface ICampaign {
     participantes?: IParticipants[];
     escala?: IEscala[];
     itens?: IProduct[];
+    //alteração
+    marcas?:IProduct[]
+    vendors?:Operador[]
 }
 
 export interface IValorMeta {
