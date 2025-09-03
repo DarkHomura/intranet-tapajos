@@ -106,12 +106,6 @@ export default function CampaignRegistration() {
         dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))
     }, [])
 
-    function handleButton(){
-        dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
-        dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
-        dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))
-    }
-
     const handleAddOperador = () => {
         if (selectedOperador && meta_valor && premiacao) {
             const idparticipante =
@@ -546,7 +540,7 @@ export default function CampaignRegistration() {
 
                     <div className="max-w-3xl mx-auto space-y-4">
                         <div className="bg-white p-4 rounded shadow">
-                            <button onClick={handleButton} className="bg-green-500 hover:bg-green-600">Carregar Dados </button>
+                            
                             <h2 className="text-lg font-bold text-green-600">
                                 Detalhes da Campanha
                             </h2>
