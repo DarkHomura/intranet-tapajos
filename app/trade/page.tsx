@@ -70,35 +70,47 @@ export default function CampaignRegistration() {
     }, [productName]);
 
     useEffect(() => {
+        console.log("Operador Vendedor")
         if (tipoOperador == 'teleoperador') {
-            dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
+            //dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
         } else {
             if (control == false) {
-                dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))/*.unwrap().then(() => {
+                //dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))
+                /*.unwrap().then(() => {
                     jsonExcelRCA.forEach((item: any) => {
                         handleExcelRCA(item);
                     });
                 })*/
             }
         }
-    }, [jsonExcelRCA, tipoOperador])
+    }, [tipoOperador])
 
     useEffect(() => {
+        console.log("Produto Marca")
         if (tipoMarcaProduto == 'marca') {
-            if (control2 == false)
-                dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
+            //if (control2 == false)
+                //dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
                 //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
         } else {
-            if (control2 == false)
-                dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
+            //if (control2 == false)
+                //dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
         }
         console.log(products)
-    }, [jsonExcelMarca, tipoMarcaProduto])
+    }, [tipoMarcaProduto])
 
     useEffect(() => {
+        console.log("First Load")
         dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
         dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
+        dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
+        dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))
     }, [])
+
+    function handleButton(){
+        dispatch(fetchOperators({ busca: ' ', type: 'operador' }))
+        dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
+        dispatch(fetchVendors({ busca: ' ', type: 'vendedor' }))
+    }
 
     const handleAddOperador = () => {
         if (selectedOperador && meta_valor && premiacao) {
@@ -534,6 +546,7 @@ export default function CampaignRegistration() {
 
                     <div className="max-w-3xl mx-auto space-y-4">
                         <div className="bg-white p-4 rounded shadow">
+                            <button onClick={handleButton} className="bg-green-500 hover:bg-green-600">Carregar Dados </button>
                             <h2 className="text-lg font-bold text-green-600">
                                 Detalhes da Campanha
                             </h2>
