@@ -333,6 +333,7 @@ export default function CampaignRegistration() {
         setJsonExcelMarca(jsonMarca)
         setJsonExcelProduto(jsonProduto)
 
+        /*
         if (tipoMarcaProduto == 'marca') {
             jsonMarca.forEach((item: any) => {
                 handleExcelMarca(item)
@@ -344,7 +345,7 @@ export default function CampaignRegistration() {
                 handleExcelProdutos(item)
             })
             setControl2(true)
-        }
+        }*/
 
         if (tipoOperador == 'teleoperador') {
             jsonTeleoperador.forEach((item: any) => {
