@@ -33,7 +33,7 @@ const { Option } = Select;
 export default function CampaignRegistration() {
     const dispatch = useDispatch<AppDispatch>();
 
-    const { currentCampaign, operators, filiais, products, marcas, vendors} = useSelector(
+    const { currentCampaign, operators, filiais, products, marcas, vendors } = useSelector(
         (state: RootState) => state.trade
     );
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -89,11 +89,11 @@ export default function CampaignRegistration() {
         console.log("Produto Marca")
         if (tipoMarcaProduto == 'marca') {
             //if (control2 == false)
-                //dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
-                //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
+            //dispatch(fetchMarcasByType({ busca: ' ', type: 'marca' }))
+            //dispatch(fetchProductsByType({ busca: ' ', type: 'marca' }))
         } else {
             //if (control2 == false)
-                //dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
+            //dispatch(fetchProductsByType({ busca: ' ', type: 'produto' }))
         }
         console.log(products)
     }, [tipoMarcaProduto])
@@ -189,10 +189,10 @@ export default function CampaignRegistration() {
             const type =
                 tipoOperador === 'teleoperador' ? 'operador' : 'vendedor';
 
-                if(type == 'operador')
-                    dispatch(fetchOperators({ busca: searchTerm, type }));
-                else
-                    dispatch(fetchVendors({ busca: searchTerm, type }));
+            if (type == 'operador')
+                dispatch(fetchOperators({ busca: searchTerm, type }));
+            else
+                dispatch(fetchVendors({ busca: searchTerm, type }));
 
         } else {
             message.error('Digite o nome para buscar!');
@@ -203,7 +203,7 @@ export default function CampaignRegistration() {
             if (searchTerm) {
                 const type =
                     tipoMarcaProduto === 'produto' ? 'produto' : 'marca';
-                if(type == 'produto')
+                if (type == 'produto')
                     dispatch(fetchProductsByType({ busca: searchTerm, type }));
                 else
                     dispatch(fetchMarcasByType({ busca: searchTerm, type }));
@@ -352,8 +352,8 @@ export default function CampaignRegistration() {
                 handleExcelOperador(item)
                 //setTipoOperador('vendedor')
             })
-        }else{
-            jsonVendedor.forEach((item:any) =>{
+        } else {
+            jsonVendedor.forEach((item: any) => {
                 handleExcelRCA(item)
             })
         }
@@ -366,9 +366,9 @@ export default function CampaignRegistration() {
         setSelectedOperador(item.IDCOLABORADOR)
         setMetaValor(item.META)
         setPremiacao(item.PREMIACAO)
-        if(tipoOperador == 'teleoperador'){
+        if (tipoOperador == 'teleoperador') {
             console.log(operators)
-        }else{
+        } else {
             console.log(vendors)
         }
         if (item) {
@@ -481,7 +481,7 @@ export default function CampaignRegistration() {
     const handleExcelProdutos = (item: any) => {
         //setTipoMarcaProduto('produto')
         setControl2(false)
-                        
+
         const novosProdutos: { nome: string; codprod: string; descricao: string }[] = [];
 
         const produto = products?.find(
@@ -530,7 +530,7 @@ export default function CampaignRegistration() {
             <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Sidebar isOpen={isSidebarOpen} />
 
-            {}
+            { }
             <main
                 className={`pt-16 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}
             >
@@ -541,7 +541,7 @@ export default function CampaignRegistration() {
 
                     <div className="max-w-3xl mx-auto space-y-4">
                         <div className="bg-white p-4 rounded shadow">
-                            
+
                             <h2 className="text-lg font-bold text-green-600">
                                 Detalhes da Campanha
                             </h2>
@@ -571,11 +571,6 @@ export default function CampaignRegistration() {
                                     </Option>
                                 ))}
                             </Select>
-                        </div>
-
-                        <div className='flex justify-start flex-col items-start'>
-                            <Label className='text-sm text-gray-500 ms-3'>Importar Arquivo excel para preenchimento dos dados</Label>
-                            <Input className='m-2' type='file' onChange={(e) => handleGetExcelFile(e)} />
                         </div>
 
                         <div className="bg-white p-4 rounded shadow">
@@ -630,6 +625,12 @@ export default function CampaignRegistration() {
                                     </label>
                                 </Radio.Group>
                             </div>
+
+                            <div className='flex flex-col items-start m-2 ml-0'>
+                                <Label className='text-sm text-gray-500 ms-3 ml-0'>Importar Arquivo excel para preenchimento dos dados </Label>
+                                <Input className='m-2 ml-0' type='file' onChange={(e) => handleGetExcelFile(e)} />
+                            </div>
+
                             <div className="flex gap-2 mb-2">
                                 <Select
                                     showSearch
@@ -641,7 +642,7 @@ export default function CampaignRegistration() {
                                     onSelect={(_, option) => {
                                         setSelectedOperador(option.nome);
                                     }}
-                                    options={(( tipoOperador == 'teleoperador'? operators: vendors) || []).map(
+                                    options={((tipoOperador == 'teleoperador' ? operators : vendors) || []).map(
                                         (operator: Operador) => ({
                                             value:
                                                 tipoOperador === 'teleoperador'
@@ -822,7 +823,7 @@ export default function CampaignRegistration() {
                                             option.label as string
                                         );
                                     }}
-                                    options={( (tipoMarcaProduto == 'marca' ? marcas :  products) || []).map(
+                                    options={((tipoMarcaProduto == 'marca' ? marcas : products) || []).map(
                                         (product: IProduct) => ({
                                             value:
                                                 tipoMarcaProduto === 'produto'
