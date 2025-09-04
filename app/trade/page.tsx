@@ -311,6 +311,7 @@ export default function CampaignRegistration() {
     };
 
     const handleGetExcelFile = async (e: any) => {
+        console.log("DADOS")
         const file = e.target.files[0]
         setFileName(file.name)
 
@@ -627,7 +628,7 @@ export default function CampaignRegistration() {
                             </div>
 
                             <div className='flex flex-col items-start m-2 ml-0'>
-                                <Label className='text-sm text-gray-500 ms-3 ml-0'>Importar Arquivo excel para preenchimento dos dados </Label>
+                                <Label className='text-sm text-gray-500 ms-3 ml-0'>Importar Arquivo excel para preenchimento dos dados de Teleoperador/vendedor selecionado.</Label>
                                 <Input className='m-2 ml-0' type='file' onChange={(e) => handleGetExcelFile(e)} />
                             </div>
 
